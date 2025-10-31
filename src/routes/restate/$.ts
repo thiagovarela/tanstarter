@@ -6,14 +6,14 @@ import { greeter } from "@/restate";
 const endpoint = restate.createEndpointHandler({ services: [greeter] });
 
 export const Route = createFileRoute("/restate/$")({
-  server: {
-    handlers: {
-      GET: ({ request }) => {
-        return endpoint(request);
-      },
-      POST: ({ request }) => {
-        return endpoint(request);
-      },
-    },
-  },
+	server: {
+		handlers: {
+			GET: ({ request }) => {
+				return endpoint(request);
+			},
+			POST: ({ request }) => {
+				return endpoint(request);
+			},
+		},
+	},
 });
