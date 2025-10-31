@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RestateSplatRouteImport } from './routes/restate/$'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
@@ -29,6 +30,11 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RestateSplatRoute = RestateSplatRouteImport.update({
+  id: '/restate/$',
+  path: '/restate/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
+  '/restate/$': typeof RestateSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -71,6 +78,7 @@ export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
+  '/restate/$': typeof RestateSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -82,6 +90,7 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
+  '/restate/$': typeof RestateSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -92,9 +101,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/api/health'
+    | '/restate/$'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/projects' | '/login' | '/register' | '/api/health' | '/api/auth/$'
+  to:
+    | '/'
+    | '/projects'
+    | '/login'
+    | '/register'
+    | '/api/health'
+    | '/restate/$'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/'
@@ -104,6 +121,7 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_auth/register'
     | '/api/health'
+    | '/restate/$'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -112,6 +130,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   ApiHealthRoute: typeof ApiHealthRoute
+  RestateSplatRoute: typeof RestateSplatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -136,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/restate/$': {
+      id: '/restate/$'
+      path: '/restate/$'
+      fullPath: '/restate/$'
+      preLoaderRoute: typeof RestateSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/health': {
@@ -203,6 +229,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   ApiHealthRoute: ApiHealthRoute,
+  RestateSplatRoute: RestateSplatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

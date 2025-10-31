@@ -12,3 +12,10 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
+
+  restate:
+    image: docker.restate.dev/restatedev/restate:latest
+    ports:
+      - 9070:9070
+      - 9071:9071
+      - 8080:8080
