@@ -1,10 +1,11 @@
 import { sql } from "drizzle-orm";
 import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { z } from "zod";
+import { primaryKey } from "./primary-key";
 import { ts } from "./timestamps";
 
 export const users = pgTable("users", {
-	id: uuid("id").default(sql`uuidv7()`).primaryKey(),
+	...primaryKey,
 	name: text("name").notNull(),
 	email: text("email").notNull().unique(),
 	emailVerified: boolean("email_verified").default(false).notNull(),
@@ -29,7 +30,7 @@ export const userSchema = z.object({
 });
 
 export const sessions = pgTable("sessions", {
-	id: uuid("id").default(sql`uuidv7()`).primaryKey(),
+	...primaryKey,
 	expiresAt: timestamp("expires_at").notNull(),
 	token: text("token").notNull().unique(),
 	...ts,
@@ -43,7 +44,7 @@ export const sessions = pgTable("sessions", {
 });
 
 export const accounts = pgTable("accounts", {
-	id: uuid("id").default(sql`uuidv7()`).primaryKey(),
+	...primaryKey,
 	accountId: text("account_id").notNull(),
 	providerId: text("provider_id").notNull(),
 	userId: uuid("user_id")
@@ -60,7 +61,7 @@ export const accounts = pgTable("accounts", {
 });
 
 export const verifications = pgTable("verifications", {
-	id: uuid("id").default(sql`uuidv7()`).primaryKey(),
+	...primaryKey,
 	identifier: text("identifier").notNull(),
 	value: text("value").notNull(),
 	expiresAt: timestamp("expires_at").notNull(),
@@ -68,7 +69,7 @@ export const verifications = pgTable("verifications", {
 });
 
 export const organizations = pgTable("organizations", {
-	id: uuid("id").default(sql`uuidv7()`).primaryKey(),
+	...primaryKey,
 	name: text("name").notNull(),
 	slug: text("slug").notNull().unique(),
 	logo: text("logo"),
@@ -79,7 +80,7 @@ export const organizations = pgTable("organizations", {
 export type Organization = typeof organizations.$inferSelect;
 
 export const members = pgTable("members", {
-	id: uuid("id").default(sql`uuidv7()`).primaryKey(),
+	...primaryKey,
 	organizationId: uuid("organization_id")
 		.notNull()
 		.references(() => organizations.id, { onDelete: "cascade" }),
@@ -91,7 +92,7 @@ export const members = pgTable("members", {
 });
 
 export const invitations = pgTable("invitations", {
-	id: uuid("id").default(sql`uuidv7()`).primaryKey(),
+	...primaryKey,
 	organizationId: uuid("organization_id")
 		.notNull()
 		.references(() => organizations.id, { onDelete: "cascade" }),

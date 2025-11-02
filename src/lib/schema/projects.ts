@@ -1,10 +1,10 @@
-import { sql } from "drizzle-orm";
 import { boolean, pgTable, text, uuid } from "drizzle-orm/pg-core";
 import { organizations } from "./auth";
+import { primaryKey } from "./primary-key";
 import { ts } from "./timestamps";
 
 export const projects = pgTable("projects", {
-	id: uuid("id").default(sql`uuidv7()`).primaryKey(),
+	...primaryKey,
 	name: text("name").notNull(),
 	logo: text("logo"),
 	organizationId: uuid("organization_id")

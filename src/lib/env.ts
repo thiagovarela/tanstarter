@@ -2,21 +2,17 @@ import { z } from "zod";
 
 const envSchema = z
 	.object({
-		DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
-		RESTATE_URL: z.string().min(1, "RESTATE_URL is required"),
-		GOOGLE_ID_CLIENT_ID: z.string().min(1, "GOOGLE_ID_CLIENT_ID is required"),
-		GOOGLE_ID_CLIENT_SECRET: z
-			.string()
-			.min(1, "GOOGLE_ID_CLIENT_SECRET is required"),
-		BETTER_AUTH_SECRET: z.string().min(1, "BETTER_AUTH_SECRET is required"),
-		BETTER_AUTH_URL: z.string().min(1, "BETTER_AUTH_URL is required"),
+		DATABASE_URL: z.url(),
+		RESTATE_URL: z.url(),
+		GOOGLE_ID_CLIENT_ID: z.string(),
+		GOOGLE_ID_CLIENT_SECRET: z.string(),
+		BETTER_AUTH_SECRET: z.string(),
+		BETTER_AUTH_URL: z.string(),
 		RESTATE_DEPLOYMENT_URL: z
-			.string()
 			.url("RESTATE_DEPLOYMENT_URL must be a valid URL")
 			.optional()
 			.default("http://localhost:3000/api/restate/v0"),
 		RESTATE_ADMIN_URL: z
-			.string()
 			.url("RESTATE_ADMIN_URL must be a valid URL")
 			.optional()
 			.default("http://localhost:9070"),
@@ -35,7 +31,7 @@ const parsed = envSchema.safeParse({
 });
 
 if (!parsed.success) {
-	const formatted = parsed.error.format();
+	const formatted = z.treeifyError(parsed.error);
 	throw new Error(
 		`Invalid environment variables:\n${JSON.stringify(formatted, null, 2)}`,
 	);
