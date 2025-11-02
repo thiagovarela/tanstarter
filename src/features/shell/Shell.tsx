@@ -1,4 +1,4 @@
-import { AppSidebar } from "./app-sidebar";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -13,7 +13,7 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { AppSidebar } from "./app-sidebar";
 
 export function Shell({ children }: React.PropsWithChildren) {
 	return (

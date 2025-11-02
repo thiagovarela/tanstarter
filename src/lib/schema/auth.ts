@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
+import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { ts } from "./timestamps";
-import { pgTable, uuid, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { z } from "zod";
 
 export const users = pgTable("users", {
 	id: uuid("id").default(sql`uuidv7()`).primaryKey(),
@@ -15,6 +16,16 @@ export const users = pgTable("users", {
 	banned: boolean("banned").default(false),
 	banReason: text("ban_reason"),
 	banExpires: timestamp("ban_expires"),
+});
+
+export const userSchema = z.object({
+	id: z.uuid(),
+	email: z.email(),
+	emailVerified: z.boolean(),
+	name: z.string(),
+	image: z.string().optional().nullable(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
 });
 
 export const sessions = pgTable("sessions", {
@@ -61,9 +72,11 @@ export const organizations = pgTable("organizations", {
 	name: text("name").notNull(),
 	slug: text("slug").notNull().unique(),
 	logo: text("logo"),
-	createdAt: timestamp("created_at").notNull(),
+	createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 	metadata: text("metadata"),
 });
+
+export type Organization = typeof organizations.$inferSelect;
 
 export const members = pgTable("members", {
 	id: uuid("id").default(sql`uuidv7()`).primaryKey(),

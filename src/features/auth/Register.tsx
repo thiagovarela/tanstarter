@@ -1,6 +1,9 @@
-import { z } from "zod";
 import { useForm } from "@tanstack/react-form";
-import { cn } from "@/lib/utils";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { z } from "zod";
+import { FieldInfo } from "@/components/form/field-info";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -9,18 +12,16 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
-import { Link } from "@tanstack/react-router";
-import { authClient } from "@/lib/auth-client";
-import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { FieldInfo } from "@/components/form/field-info";
+import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
+import { getAuthErrorMessage, type AuthClientError } from "./utils";
 
 // Inline Zod schema with password confirmation
 const registerSchema = z
 	.object({
+		name: z.string().min(1),
 		email: z.email("Invalid email address"),
 		password: z.string().min(8, "Password must be at least 8 characters"),
 		confirmPassword: z.string(),
@@ -35,6 +36,7 @@ export function Register({ className, ...props }: React.ComponentProps<"div">) {
 
 	const form = useForm({
 		defaultValues: {
+			name: "",
 			email: "",
 			password: "",
 			confirmPassword: "",
@@ -43,18 +45,21 @@ export function Register({ className, ...props }: React.ComponentProps<"div">) {
 			onChange: registerSchema,
 		},
 		onSubmit: async ({ value }) => {
-			try {
-				await authClient.signUp.email({
-					email: value.email,
-					password: value.password,
-					name: "", // Optional name field
-					callbackURL: "/projects",
-				});
-				toast.success("Registration successful!");
-				navigate({ to: "/projects" });
-			} catch (error) {
-				toast.error((error as Error).message || "Registration failed");
+			const result = await authClient.signUp.email({
+				name: value.name,
+				email: value.email,
+				password: value.password,
+				callbackURL: "/projects",
+			});
+
+			if (result.error) {
+				toast.error(getAuthErrorMessage(result.error as AuthClientError));
+				return;
 			}
+
+			toast.success("Registration successful! Please verify your e-mail");
+
+			navigate({ to: "/login" });
 		},
 	});
 
@@ -76,6 +81,22 @@ export function Register({ className, ...props }: React.ComponentProps<"div">) {
 						}}
 					>
 						<FieldGroup>
+							<form.Field
+								name="name"
+								children={(field) => (
+									<div className="grid gap-2">
+										<Label htmlFor={field.name}>Name</Label>
+										<Input
+											id={field.name}
+											type="text"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+										/>
+										<FieldInfo field={field} />
+									</div>
+								)}
+							/>
 							<form.Field
 								name="email"
 								children={(field) => (

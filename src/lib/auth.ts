@@ -5,10 +5,12 @@ import { admin } from "better-auth/plugins/admin";
 import { organization } from "better-auth/plugins/organization";
 import { anonymous } from "better-auth/plugins";
 import { lastLoginMethod } from "better-auth/plugins";
-import { createServerFn } from "@tanstack/react-start";
 
 import { client } from "@/lib/drizzle";
 import * as schema from "@/lib/schema/auth";
+
+import { restateClient } from "./restate-client";
+import { Accounts } from "./workflows";
 
 export const auth = betterAuth({
 	secret: Bun.env.BETTER_AUTH_SECRET,
@@ -28,6 +30,25 @@ export const auth = betterAuth({
 	}),
 	emailAndPassword: {
 		enabled: true,
+		requireEmailVerification: true,
+	},
+	emailVerification: {
+		sendOnSignUp: true,
+		autoSignInAfterVerification: true,
+		sendVerificationEmail: async ({ user, url }) => {
+			await restateClient
+				.serviceClient(Accounts)
+				.sendVerificationEmail({ email: user.email, name: user.name, url });
+		},
+	},
+	databaseHooks: {
+		user: {
+			create: {
+				after: async (user) => {
+					await restateClient.serviceClient(Accounts).createDefaults(user);
+				},
+			},
+		},
 	},
 	socialProviders: {
 		google: {

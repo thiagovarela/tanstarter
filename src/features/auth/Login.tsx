@@ -1,6 +1,9 @@
-import { z } from "zod";
 import { useForm } from "@tanstack/react-form";
-import { cn } from "@/lib/utils";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { z } from "zod";
+import { FieldInfo } from "@/components/form/field-info";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -9,14 +12,11 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
-import { Link } from "@tanstack/react-router";
-import { authClient } from "@/lib/auth-client";
-import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { FieldInfo } from "@/components/form/field-info";
+import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
+import { getAuthErrorMessage, type AuthClientError } from "./utils";
 
 // Inline Zod schema
 const loginSchema = z.object({
@@ -36,17 +36,29 @@ export function Login({ className, ...props }: React.ComponentProps<"div">) {
 			onChange: loginSchema,
 		},
 		onSubmit: async ({ value }) => {
-			try {
-				await authClient.signIn.email({
-					email: value.email,
-					password: value.password,
-					callbackURL: "/projects",
-				});
-				toast.success("Login successful!");
-				navigate({ to: "/projects" });
-			} catch (error) {
-				toast.error((error as Error).message || "Login failed");
+			const result = await authClient.signIn.email({
+				email: value.email,
+				password: value.password,
+				callbackURL: "/projects",
+			});
+
+			if (result.error) {
+				toast.error(getAuthErrorMessage(result.error as AuthClientError));
+				return;
 			}
+
+			toast.success("Login successful!");
+
+			if (
+				result.data?.redirect &&
+				result.data.url &&
+				typeof window !== "undefined"
+			) {
+				window.location.assign(result.data.url);
+				return;
+			}
+
+			navigate({ to: "/projects" });
 		},
 	});
 

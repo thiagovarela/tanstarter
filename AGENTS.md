@@ -15,9 +15,9 @@
 - **Components**: shadcn/ui patterns with cva variants, PascalCase naming
 - **Forms**: TanStack Form with Zod validation, proper error handling
 - **Async**: TanStack Query for data fetching, toast notifications for feedback
-- **File structure**: `src/routes/` (feature-based), `src/components/ui/` (core), `src/features/` (features), `src/restate/` (workflows)
+- **File structure**: `src/routes/` (feature-based), `src/components/ui/` (core), `src/features/` (features), `src/lib/workflows/` (workflows)
 - **Styling**: Tailwind CSS with class-variance-authority, cn() utility for classes
-- **Workflows**: Restate services in `src/restate/` with durable execution, Zod validation, and endpoint handlers in routes
+- **Workflows**: Restate services in `src/lib/workflows/` with durable execution, Zod validation, and endpoint handlers in routes
 
 ## Tech Stack
 - **Auth**: better-auth with multi-tenant organizations/members

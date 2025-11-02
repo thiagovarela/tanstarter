@@ -12,12 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as RestateSplatRouteImport } from './routes/restate/$'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AppProjectsRouteImport } from './routes/_app/projects'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiRestateV0SplatRouteImport } from './routes/api/restate/v0/$'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -30,11 +30,6 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RestateSplatRoute = RestateSplatRouteImport.update({
-  id: '/restate/$',
-  path: '/restate/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
@@ -62,6 +57,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRestateV0SplatRoute = ApiRestateV0SplatRouteImport.update({
+  id: '/api/restate/v0/$',
+  path: '/api/restate/v0/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -69,8 +69,8 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
-  '/restate/$': typeof RestateSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/restate/v0/$': typeof ApiRestateV0SplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,8 +78,8 @@ export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
-  '/restate/$': typeof RestateSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/restate/v0/$': typeof ApiRestateV0SplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -90,8 +90,8 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
-  '/restate/$': typeof RestateSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/restate/v0/$': typeof ApiRestateV0SplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,8 +101,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/api/health'
-    | '/restate/$'
     | '/api/auth/$'
+    | '/api/restate/v0/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -110,8 +110,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/api/health'
-    | '/restate/$'
     | '/api/auth/$'
+    | '/api/restate/v0/$'
   id:
     | '__root__'
     | '/'
@@ -121,8 +121,8 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_auth/register'
     | '/api/health'
-    | '/restate/$'
     | '/api/auth/$'
+    | '/api/restate/v0/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -130,8 +130,8 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   ApiHealthRoute: typeof ApiHealthRoute
-  RestateSplatRoute: typeof RestateSplatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiRestateV0SplatRoute: typeof ApiRestateV0SplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -155,13 +155,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/restate/$': {
-      id: '/restate/$'
-      path: '/restate/$'
-      fullPath: '/restate/$'
-      preLoaderRoute: typeof RestateSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/health': {
@@ -199,6 +192,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/restate/v0/$': {
+      id: '/api/restate/v0/$'
+      path: '/api/restate/v0/$'
+      fullPath: '/api/restate/v0/$'
+      preLoaderRoute: typeof ApiRestateV0SplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -229,8 +229,8 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   ApiHealthRoute: ApiHealthRoute,
-  RestateSplatRoute: RestateSplatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiRestateV0SplatRoute: ApiRestateV0SplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
