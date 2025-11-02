@@ -28,7 +28,7 @@ export const accounts = restate.service({
 		createDefaults: async (ctx: restate.Context, user) => {
 			await ctx.run("createDefaults", () => createDefaults(user));
 			await ctx.run("welcome", () => sendWelcomeEmail(user));
-			return "success";
+			return "yay";
 		},
 	},
 });

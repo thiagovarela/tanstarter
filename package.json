@@ -15,7 +15,8 @@
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio",
-    "prepare": "husky"
+    "prepare": "husky",
+    "restate:deploy": "bun run scripts/register-restate.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
