@@ -47,6 +47,16 @@ async function createDefaults(user: User) {
       insert into organizations ${sql(orgData)}
       returning *
     `;
+		const memberData = {
+			organization_id: organization.id,
+			user_id: user.id,
+			role: "owner",
+		};
+		await tx`
+      insert into members ${sql(memberData)}
+      returning *
+    `;
+
 		const projectData = {
 			name: `Default Project`,
 			organization_id: organization.id,

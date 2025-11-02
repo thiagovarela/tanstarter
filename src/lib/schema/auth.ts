@@ -87,7 +87,7 @@ export const members = pgTable("members", {
 		.notNull()
 		.references(() => users.id, { onDelete: "cascade" }),
 	role: text("role").default("member").notNull(),
-	createdAt: timestamp("created_at").notNull(),
+	createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 });
 
 export const invitations = pgTable("invitations", {
