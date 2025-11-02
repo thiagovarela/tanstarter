@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 export const Route = createFileRoute("/api/health")({
 	server: {
 		handlers: {
-			GET: async ({ request }) => {
+			GET: async () => {
 				await db`SELECT 1`;
 				return new Response("Hello, World!");
 			},

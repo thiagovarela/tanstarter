@@ -1,8 +1,8 @@
 import * as restate from "@restatedev/restate-sdk";
 import { serde } from "@restatedev/restate-sdk-zod";
+import type { User } from "better-auth";
 import { z } from "zod";
 import { sql } from "@/lib/db";
-import type { User } from "better-auth";
 
 const VerificationEmailInput = z.object({
 	email: z.email(),

@@ -1,20 +1,20 @@
-import { reactStartCookies } from "better-auth/react-start";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { anonymous, lastLoginMethod } from "better-auth/plugins";
 import { admin } from "better-auth/plugins/admin";
 import { organization } from "better-auth/plugins/organization";
-import { anonymous } from "better-auth/plugins";
-import { lastLoginMethod } from "better-auth/plugins";
+import { reactStartCookies } from "better-auth/react-start";
 
 import { client } from "@/lib/drizzle";
 import * as schema from "@/lib/schema/auth";
 
+import { env } from "./env";
 import { restateClient } from "./restate-client";
 import { Accounts } from "./workflows";
 
 export const auth = betterAuth({
-	secret: Bun.env.BETTER_AUTH_SECRET,
-	baseURL: Bun.env.BETTER_AUTH_URL,
+	secret: env.BETTER_AUTH_SECRET,
+	baseURL: env.BETTER_AUTH_URL,
 	basePath: "/api/auth",
 	advanced: {
 		database: {
@@ -52,8 +52,8 @@ export const auth = betterAuth({
 	},
 	socialProviders: {
 		google: {
-			clientId: Bun.env.GOOGLE_ID_CLIENT_ID!,
-			clientSecret: Bun.env.GOOGLE_ID_CLIENT_SECRET!,
+			clientId: env.GOOGLE_ID_CLIENT_ID,
+			clientSecret: env.GOOGLE_ID_CLIENT_SECRET,
 			redirectURI: "api/auth/google/callback",
 			scope: ["openid", "profile", "email"],
 		},

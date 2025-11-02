@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { ts } from "./timestamps";
 import { z } from "zod";
+import { ts } from "./timestamps";
 
 export const users = pgTable("users", {
 	id: uuid("id").default(sql`uuidv7()`).primaryKey(),

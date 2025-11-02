@@ -1,3 +1,5 @@
 import * as restate from "@restatedev/restate-sdk-clients";
 
-export const restateClient = restate.connect({ url: Bun.env.RESTATE_URL! });
+import { env } from "./env";
+
+export const restateClient = restate.connect({ url: env.RESTATE_URL });

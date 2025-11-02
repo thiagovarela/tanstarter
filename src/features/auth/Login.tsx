@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { getAuthErrorMessage, type AuthClientError } from "./utils";
+import { type AuthClientError, getAuthErrorMessage } from "./utils";
 
 // Inline Zod schema
 const loginSchema = z.object({
@@ -80,9 +80,8 @@ export function Login({ className, ...props }: React.ComponentProps<"div">) {
 						}}
 					>
 						<FieldGroup>
-							<form.Field
-								name="email"
-								children={(field) => (
+							<form.Field name="email">
+								{(field) => (
 									<div className="grid gap-2">
 										<Label htmlFor={field.name}>Email</Label>
 										<Input
@@ -96,10 +95,9 @@ export function Login({ className, ...props }: React.ComponentProps<"div">) {
 										<FieldInfo field={field} />
 									</div>
 								)}
-							/>
-							<form.Field
-								name="password"
-								children={(field) => (
+							</form.Field>
+							<form.Field name="password">
+								{(field) => (
 									<div className="grid gap-2">
 										<Label htmlFor={field.name}>Password</Label>
 										<Input
@@ -112,7 +110,7 @@ export function Login({ className, ...props }: React.ComponentProps<"div">) {
 										<FieldInfo field={field} />
 									</div>
 								)}
-							/>
+							</form.Field>
 							<div className="flex items-center">
 								<button
 									type="button"

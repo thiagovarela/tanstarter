@@ -1,10 +1,28 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
 
 export function useTheme() {
 	const [theme, setTheme] = useState<Theme>("system");
 	const [isDark, setIsDark] = useState(false);
+
+	const applyTheme = useCallback((selectedTheme: Theme) => {
+		const root = window.document.documentElement;
+		root.classList.remove("light", "dark");
+
+		if (selectedTheme === "system") {
+			const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+				.matches
+				? "dark"
+				: "light";
+
+			root.classList.add(systemTheme);
+			setIsDark(systemTheme === "dark");
+		} else {
+			root.classList.add(selectedTheme);
+			setIsDark(selectedTheme === "dark");
+		}
+	}, []);
 
 	useEffect(() => {
 		// Get stored theme or default to system
@@ -14,29 +32,11 @@ export function useTheme() {
 
 		// Apply theme
 		applyTheme(initialTheme);
-	}, []);
+	}, [applyTheme]);
 
 	useEffect(() => {
 		applyTheme(theme);
-	}, [theme]);
-
-	function applyTheme(theme: Theme) {
-		const root = window.document.documentElement;
-		root.classList.remove("light", "dark");
-
-		if (theme === "system") {
-			const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-				.matches
-				? "dark"
-				: "light";
-
-			root.classList.add(systemTheme);
-			setIsDark(systemTheme === "dark");
-		} else {
-			root.classList.add(theme);
-			setIsDark(theme === "dark");
-		}
-	}
+	}, [applyTheme, theme]);
 
 	function setThemeWithStorage(newTheme: Theme) {
 		setTheme(newTheme);
