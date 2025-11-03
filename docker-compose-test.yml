@@ -1,0 +1,16 @@
+services:
+  postgres-test:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: tanstarter_test
+    ports:
+      - "55432:5432"
+
+  restate-test:
+    image: docker.restate.dev/restatedev/restate:latest
+    ports:
+      - "19070:9070"
+      - "19071:9071"
+      - "18080:8080"
