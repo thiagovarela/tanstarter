@@ -1,7 +1,7 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 
 describe("smoke", () => {
-	test("runs", () => {
-		expect(true).toBe(true);
-	});
+  test("runs", () => {
+    expect(true).toBe(true);
+  });
 });

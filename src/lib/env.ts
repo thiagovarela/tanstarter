@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+const runtimeEnv =
+	typeof Bun !== "undefined"
+		? Bun.env
+		: (process.env as Record<string, string | undefined>);
+
 const envSchema = z
 	.object({
 		DATABASE_URL: z.url(),
@@ -7,27 +12,24 @@ const envSchema = z
 		GOOGLE_ID_CLIENT_ID: z.string(),
 		GOOGLE_ID_CLIENT_SECRET: z.string(),
 		BETTER_AUTH_SECRET: z.string(),
-		BETTER_AUTH_URL: z.string(),
+		BETTER_AUTH_URL: z.url(),
 		RESTATE_DEPLOYMENT_URL: z
-			.url("RESTATE_DEPLOYMENT_URL must be a valid URL")
+			.url()
 			.optional()
 			.default("http://localhost:3000/api/restate/v0"),
-		RESTATE_ADMIN_URL: z
-			.url("RESTATE_ADMIN_URL must be a valid URL")
-			.optional()
-			.default("http://localhost:9070"),
+		RESTATE_ADMIN_URL: z.url().optional().default("http://localhost:9070"),
 	})
 	.strip();
 
 const parsed = envSchema.safeParse({
-	DATABASE_URL: Bun.env.DATABASE_URL,
-	RESTATE_URL: Bun.env.RESTATE_URL,
-	GOOGLE_ID_CLIENT_ID: Bun.env.GOOGLE_ID_CLIENT_ID,
-	GOOGLE_ID_CLIENT_SECRET: Bun.env.GOOGLE_ID_CLIENT_SECRET,
-	BETTER_AUTH_SECRET: Bun.env.BETTER_AUTH_SECRET,
-	BETTER_AUTH_URL: Bun.env.BETTER_AUTH_URL,
-	RESTATE_DEPLOYMENT_URL: Bun.env.RESTATE_DEPLOYMENT_URL,
-	RESTATE_ADMIN_URL: Bun.env.RESTATE_ADMIN_URL,
+	DATABASE_URL: runtimeEnv.DATABASE_URL,
+	RESTATE_URL: runtimeEnv.RESTATE_URL,
+	GOOGLE_ID_CLIENT_ID: runtimeEnv.GOOGLE_ID_CLIENT_ID,
+	GOOGLE_ID_CLIENT_SECRET: runtimeEnv.GOOGLE_ID_CLIENT_SECRET,
+	BETTER_AUTH_SECRET: runtimeEnv.BETTER_AUTH_SECRET,
+	BETTER_AUTH_URL: runtimeEnv.BETTER_AUTH_URL,
+	RESTATE_DEPLOYMENT_URL: runtimeEnv.RESTATE_DEPLOYMENT_URL,
+	RESTATE_ADMIN_URL: runtimeEnv.RESTATE_ADMIN_URL,
 });
 
 if (!parsed.success) {

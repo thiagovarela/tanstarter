@@ -1,4 +1,5 @@
-import { drizzle } from "drizzle-orm/bun-sql";
-import { sql } from "@/lib/db.ts";
+import { drizzle } from "drizzle-orm/postgres-js";
 
-export const client = drizzle({ client: sql, casing: "snake_case" });
+import { sql } from "@/lib/db";
+
+export const client = drizzle(sql, { casing: "snake_case" });

@@ -1,43 +1,69 @@
-import { beforeAll, afterAll, beforeEach } from "bun:test";
-import { migrate } from "drizzle-orm/bun-sql/migrator";
+import { afterAll, beforeEach } from "vitest";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
+import {
+  PostgreSqlContainer,
+  type StartedPostgreSqlContainer,
+} from "@testcontainers/postgresql";
 
-const databaseUrl = Bun.env.DATABASE_URL;
+import type { Sql } from "postgres";
 
-if (!databaseUrl) {
-	throw new Error(
-		[
-			"[tests] DATABASE_URL is not set.",
-			"Start the test services with:",
-			"  docker compose -f docker-compose-test.yml up -d",
-			"and export DATABASE_URL=postgres://postgres:password@localhost:55432/tanstarter_test before running `bun test`.",
-		].join("\n"),
-	);
+let container: StartedPostgreSqlContainer | undefined;
+const existingDatabaseUrl = process.env.DATABASE_URL;
+
+if (!existingDatabaseUrl) {
+  try {
+    container = await new PostgreSqlContainer("docker.io/postgres:18-alpine")
+      .withDatabase("tanstarter_test")
+      .withUsername("postgres")
+      .withPassword("password")
+      .start();
+    process.env.DATABASE_URL = container.getConnectionUri();
+  } catch (error) {
+    const reason =
+      error instanceof Error ? error.message : JSON.stringify(error);
+    throw new Error(
+      [
+        "[tests] Failed to start Postgres test container.",
+        "Ensure Docker is running and accessible, or provide DATABASE_URL pointing to a test database.",
+        `Original error: ${reason}`,
+      ].join(" "),
+    );
+  }
+} else {
+  console.info(`[tests] Using provided DATABASE_URL=${existingDatabaseUrl}`);
 }
 
-let sqlClient: import("bun").SQL | undefined;
+const databaseUrl = process.env.DATABASE_URL;
+
+process.env.RESTATE_URL ??= "http://localhost:8080";
+process.env.GOOGLE_ID_CLIENT_ID ??= "vitest-google-client-id";
+process.env.GOOGLE_ID_CLIENT_SECRET ??= "vitest-google-client-secret";
+process.env.BETTER_AUTH_SECRET ??= "vitest-better-auth-secret";
+process.env.BETTER_AUTH_URL ??= "http://localhost:3000";
+
+let sqlClient: Sql | undefined;
 let drizzleClient: typeof import("@/lib/drizzle").client | undefined;
 
-beforeAll(async () => {
-	const [{ sql }, { client }] = await Promise.all([
-		import("@/lib/db"),
-		import("@/lib/drizzle"),
-	]);
+const [{ sql }, { client }] = await Promise.all([
+  import("@/lib/db"),
+  import("@/lib/drizzle"),
+]);
 
-	sqlClient = sql;
-	drizzleClient = client;
+sqlClient = sql;
+drizzleClient = client;
 
-	console.info(`[tests] using DATABASE_URL=${databaseUrl}`);
-	await migrate(drizzleClient, {
-		migrationsFolder: "./migrations",
-	});
+console.info(`[tests] PostgreSQL ready at ${databaseUrl}`);
+
+await migrate(drizzleClient, {
+  migrationsFolder: "./migrations",
 });
 
 beforeEach(async () => {
-	if (!sqlClient) {
-		throw new Error("SQL client not initialised");
-	}
+  if (!sqlClient) {
+    throw new Error("SQL client not initialised");
+  }
 
-	await sqlClient`
+  await sqlClient`
 		DO $$
 		DECLARE
 			stmt text;
@@ -57,7 +83,8 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-	await sqlClient?.close();
+  await sqlClient?.end({ timeout: 0 });
+  if (container) {
+    await container.stop();
+  }
 });
-
-export {};

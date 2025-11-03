@@ -1,10 +1,11 @@
-import { SQL } from "bun";
+import postgres from "postgres";
 
 import { env } from "./env";
 
-export const sql = new SQL(env.DATABASE_URL, {
-	idleTimeout: 30,
+export const sql = postgres(env.DATABASE_URL, {
+	idle_timeout: 30,
 	max: 20,
+	transform: postgres.toCamel,
 });
 
 export const db = sql;

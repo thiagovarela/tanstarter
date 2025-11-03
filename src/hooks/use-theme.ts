@@ -27,7 +27,7 @@ export function useTheme() {
 	useEffect(() => {
 		// Get stored theme or default to system
 		const stored = localStorage.getItem("theme") as Theme | null;
-		const initialTheme = stored || "system";
+		const initialTheme = stored || "dark";
 		setTheme(initialTheme);
 
 		// Apply theme

@@ -10,6 +10,12 @@ type ProvisionedOrganization = {
 };
 
 type OrganizationMembership = { id: string; name: string } | undefined;
+type OrganizationRow = {
+	id: string;
+	name: string;
+	slug: string;
+	createdAt: Date;
+};
 
 const MAX_ATTEMPTS = 5;
 
@@ -49,7 +55,7 @@ export async function ensureDefaultOrganizationForUser(
 			const slug = attempt === 0 ? slugBase : `${slugBase}-${attempt + 1}`;
 
 			try {
-				const [organization] = await tx`
+				const [organization] = await tx<OrganizationRow[]>`
 					insert into organizations ${sql({
 						name: organizationName,
 						slug,
@@ -85,7 +91,9 @@ export async function ensureDefaultOrganizationForUser(
 export async function getActiveOrganizationForUser(
 	userId: string,
 ): Promise<OrganizationMembership> {
-	const [existingMembership] = await sql`
+	const [existingMembership] = await sql<
+		Exclude<OrganizationMembership, undefined>[]
+	>`
 		select o.id, o.name
 		from members m
 		inner join organizations o on o.id = m.organization_id
