@@ -9,6 +9,10 @@ import { client } from "@/lib/drizzle";
 import * as schema from "@/lib/schema/auth";
 
 import { env } from "./env";
+import {
+	ensureDefaultOrganizationForUser,
+	getActiveOrganizationForUser,
+} from "./organizations/provision";
 import { restateClient } from "./restate-client";
 import { Accounts } from "./workflows";
 
@@ -45,7 +49,41 @@ export const auth = betterAuth({
 		user: {
 			create: {
 				after: async (user) => {
-					await restateClient.serviceClient(Accounts).createDefaults(user);
+					const { id: organizationId } =
+						await ensureDefaultOrganizationForUser(user);
+
+					try {
+						await restateClient.serviceClient(Accounts).afterUserCreated({
+							user,
+							organizationId,
+						});
+					} catch (error) {
+						console.error("Failed to trigger afterUserCreated workflow", error);
+					}
+				},
+			},
+		},
+		session: {
+			create: {
+				before: async (session) => {
+					let organizationId = null;
+					if (session.activeOrganizationId) {
+						organizationId = session.activeOrganizationId;
+					}
+
+					const organization = await getActiveOrganizationForUser(
+						session.userId,
+					);
+					if (organization) {
+						organizationId = organization.id;
+					}
+
+					return {
+						data: {
+							...session,
+							activeOrganizationId: organizationId,
+						},
+					};
 				},
 			},
 		},

@@ -1,6 +1,5 @@
 import * as restate from "@restatedev/restate-sdk";
 import { serde } from "@restatedev/restate-sdk-zod";
-import type { User } from "better-auth";
 import { z } from "zod";
 import { sql } from "@/lib/db";
 
@@ -8,6 +7,19 @@ const VerificationEmailInput = z.object({
 	email: z.email(),
 	name: z.string(),
 	url: z.url(),
+});
+
+const UserPayload = z
+	.object({
+		id: z.uuid(),
+		email: z.email(),
+		name: z.string().optional().nullable(),
+	})
+	.loose();
+
+const AfterUserCreatedInput = z.object({
+	user: UserPayload,
+	organizationId: z.uuid(),
 });
 
 export const accounts = restate.service({
@@ -25,11 +37,19 @@ export const accounts = restate.service({
 				return "success";
 			},
 		),
-		createDefaults: async (ctx: restate.Context, user) => {
-			await ctx.run("createDefaults", () => createDefaults(user));
-			await ctx.run("welcome", () => sendWelcomeEmail(user));
-			return "yay";
-		},
+		afterUserCreated: restate.createServiceHandler(
+			{
+				input: serde.zod(AfterUserCreatedInput),
+				output: serde.zod(z.string()),
+			},
+			async (ctx: restate.Context, { user, organizationId }) => {
+				await ctx.run("ensureDefaultProject", () =>
+					ensureDefaultProject(organizationId),
+				);
+				await ctx.run("welcome", () => sendWelcomeEmail(user));
+				return "success";
+			},
+		),
 	},
 });
 
@@ -37,40 +57,31 @@ async function sendVerificationEmail(email: string, name: string, url: string) {
 	console.log(`Sending verification email to ${name} ${email}`, url);
 }
 
-async function createDefaults(user: User) {
-	return await sql.begin(async (tx) => {
-		const orgData = {
-			name: `${user.name}'s Organization`,
-			slug: Bun.randomUUIDv7(),
-		};
-		const [organization] = await tx`
-      insert into organizations ${sql(orgData)}
-      returning *
-    `;
-		const memberData = {
-			organization_id: organization.id,
-			user_id: user.id,
-			role: "owner",
-		};
-		await tx`
-      insert into members ${sql(memberData)}
-      returning *
-    `;
+async function ensureDefaultProject(organizationId: string) {
+	const [existingProject] = await sql`
+			select id
+			from projects
+			where organization_id = ${organizationId}
+			limit 1
+		`;
 
-		const projectData = {
-			name: `Default Project`,
-			organization_id: organization.id,
-		};
-		const [project] = await tx`
-      insert into projects ${sql(projectData)}
-      returning *
-    `;
-		return [organization, project];
-	});
+	if (existingProject) {
+		return existingProject.id;
+	}
+
+	const [project] = await sql`
+			insert into projects ${sql({
+				name: "Default Project",
+				organization_id: organizationId,
+			})}
+			returning id
+		`;
+
+	return project.id;
 }
 
-async function sendWelcomeEmail(user: User) {
-	console.log(`Sending welcome email to ${user}`);
+async function sendWelcomeEmail(user: { email: string; name?: string | null }) {
+	console.log(`Sending welcome email to ${user.email}`);
 }
 
 export type AccountsService = typeof accounts;
