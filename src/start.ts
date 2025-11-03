@@ -38,6 +38,6 @@ const sessionMiddleware = createMiddleware().server(
 
 export const startInstance = createStart(() => {
 	return {
-		requestMiddleware: [loggingMiddleware, sessionMiddleware],
+		requestMiddleware: [sessionMiddleware],
 	};
 });

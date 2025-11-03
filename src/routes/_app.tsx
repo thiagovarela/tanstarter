@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { Shell } from "@/features/shell/Shell";
+import { Shell } from "@/components/shell/Shell";
 
 export const Route = createFileRoute("/_app")({
 	beforeLoad: ({ context }) => {
