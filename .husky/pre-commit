@@ -1,2 +1,3 @@
+bun run check --fix
 bunx lint-staged
 bun run check

@@ -1,0 +1,47 @@
+import type { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
+import { DataTable } from "@/components/table/data-table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useOrganizationsQuery } from "./queries";
+import type { Organization } from "./types";
+
+const columns: ColumnDef<Organization>[] = [
+	{
+		accessorKey: "name",
+		header: "Name",
+		cell: ({ row }) => (
+			<span className="font-medium text-foreground">{row.original.name}</span>
+		),
+	},
+	{
+		accessorKey: "slug",
+		header: "Slug",
+	},
+	{
+		accessorKey: "createdAt",
+		header: "Created",
+		cell: ({ row }) => {
+			const formatted = format(new Date(row.original.createdAt), "MMM d, yyyy");
+			return <span className="text-muted-foreground">{formatted}</span>;
+		},
+	},
+];
+
+export function OrganizationsView() {
+	const { data } = useOrganizationsQuery();
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Organizations</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<DataTable
+					columns={columns}
+					data={data}
+					emptyMessage="No organizations yet."
+				/>
+			</CardContent>
+		</Card>
+	);
+}
