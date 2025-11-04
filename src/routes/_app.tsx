@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { Shell } from "@/components/shell/Shell";
+import { AuthProvider } from "@/integrations/better-auth/auth-provider";
 
 export const Route = createFileRoute("/_app")({
 	beforeLoad: ({ context }) => {
@@ -12,9 +13,12 @@ export const Route = createFileRoute("/_app")({
 });
 
 function RouteComponent() {
+	const session = Route.useRouteContext();
 	return (
-		<Shell>
-			<Outlet />
-		</Shell>
+		<AuthProvider session={session}>
+			<Shell>
+				<Outlet />
+			</Shell>
+		</AuthProvider>
 	);
 }

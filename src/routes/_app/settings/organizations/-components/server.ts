@@ -1,24 +1,12 @@
-import { createServerFn } from "@tanstack/react-start";
-
+import { createAuthServerFn } from "@/lib/auth-server-fn";
 import { sql } from "@/lib/db";
+import type { Organization } from "./types";
 
-type OrganizationRow = {
-	id: string;
-	name: string;
-	slug: string;
-	createdAt: Date;
-};
+export const listOrganizations = createAuthServerFn().handler(
+	async ({ context }): Promise<Organization[]> => {
+		const userId = context.user.id;
 
-export const listOrganizations = createServerFn().handler(
-	async ({ context }) => {
-		const session = context.session;
-		const userId = session?.user?.id;
-
-		if (!userId) {
-			throw new Response("Unauthorized", { status: 401 });
-		}
-
-		return await sql<OrganizationRow[]>`
+		return await sql<Organization[]>`
 			select o.id, o.name, o.slug, o.created_at
 			from organizations o
 			inner join members m on m.organization_id = o.id

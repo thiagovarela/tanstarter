@@ -1,7 +1,7 @@
 // src/start.ts
 import { createMiddleware, createStart } from "@tanstack/react-start";
-import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
+import { sessionMiddleware } from "@/lib/middleware";
 
 const loggingMiddleware = createMiddleware().server(
 	async ({ request, next }) => {
@@ -23,16 +23,6 @@ const loggingMiddleware = createMiddleware().server(
 			logger.error({ method, url, duration, err: error }, "Request failed");
 			throw error;
 		}
-	},
-);
-
-const sessionMiddleware = createMiddleware().server(
-	async ({ next, request }) => {
-		const session = await auth.api.getSession({ headers: request.headers });
-
-		return next({
-			context: { session },
-		});
 	},
 );
 
