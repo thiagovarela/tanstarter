@@ -317,7 +317,7 @@ function App() {
 						</p>
 						<div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
 							<a
-								href="https://github.com/"
+								href="https://github.com/thiagovarela/tanstarter"
 								target="_blank"
 								rel="noreferrer"
 								className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 text-base font-semibold text-slate-900 transition-colors hover:bg-slate-100"
@@ -325,17 +325,7 @@ function App() {
 								<Github className="h-4 w-4" />
 								Clone the Template
 							</a>
-							<a
-								href="mailto:hello@tanstarter.dev"
-								className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 px-6 py-3 text-base font-semibold text-slate-200 transition-all hover:border-cyan-400 hover:text-white"
-							>
-								<Sparkles className="h-4 w-4" />
-								Request a Guided Tour
-							</a>
 						</div>
-						<p className="mt-6 text-xs uppercase tracking-[0.35em] text-cyan-200/80">
-							Includes onboarding docs, seed workflows, and Discord access
-						</p>
 					</div>
 				</section>
 			</div>

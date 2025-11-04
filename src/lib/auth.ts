@@ -13,7 +13,7 @@ import {
 	ensureDefaultOrganizationForUser,
 	getActiveOrganizationForUser,
 } from "./organizations/provision";
-import { restateClient } from "./restate-client";
+import { restate, restateClient } from "./restate-client";
 import { Accounts } from "./workflows";
 
 export const auth = betterAuth({
@@ -42,7 +42,10 @@ export const auth = betterAuth({
 		sendVerificationEmail: async ({ user, url }) => {
 			await restateClient
 				.serviceClient(Accounts)
-				.sendVerificationEmail({ email: user.email, name: user.name, url });
+				.sendVerificationEmail(
+					{ email: user.email, name: user.name, url },
+					restate.rpc.opts({ idempotencyKey: user.id }),
+				);
 		},
 	},
 	databaseHooks: {
@@ -53,10 +56,13 @@ export const auth = betterAuth({
 						await ensureDefaultOrganizationForUser(user);
 
 					try {
-						await restateClient.serviceClient(Accounts).afterUserCreated({
-							user,
-							organizationId,
-						});
+						await restateClient.serviceClient(Accounts).afterUserCreated(
+							{
+								user,
+								organizationId,
+							},
+							restate.rpc.opts({ idempotencyKey: user.id }),
+						);
 					} catch (error) {
 						console.error("Failed to trigger afterUserCreated workflow", error);
 					}
@@ -100,7 +106,19 @@ export const auth = betterAuth({
 		anonymous({ emailDomainName: "anonymous.com" }),
 		lastLoginMethod({ storeInDatabase: true }),
 		admin(),
-		organization(),
+		organization({
+			sendInvitationEmail: async (data) => {
+				await restateClient.serviceClient(Accounts).sendOrganizationInvite(
+					{
+						id: data.id,
+						email: data.email,
+						inviterName: data.inviter.user.name,
+						organizationName: data.organization.name,
+					},
+					restate.rpc.opts({ idempotencyKey: data.id }),
+				);
+			},
+		}),
 		reactStartCookies(),
 	],
 });

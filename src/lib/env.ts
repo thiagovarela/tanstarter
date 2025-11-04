@@ -7,6 +7,7 @@ const runtimeEnv =
 
 const envSchema = z
 	.object({
+		BASE_URL: z.url(),
 		DATABASE_URL: z.url(),
 		RESTATE_URL: z.url(),
 		GOOGLE_ID_CLIENT_ID: z.string(),
@@ -22,6 +23,7 @@ const envSchema = z
 	.strip();
 
 const parsed = envSchema.safeParse({
+	BASE_URL: runtimeEnv.BASE_URL,
 	DATABASE_URL: runtimeEnv.DATABASE_URL,
 	RESTATE_URL: runtimeEnv.RESTATE_URL,
 	GOOGLE_ID_CLIENT_ID: runtimeEnv.GOOGLE_ID_CLIENT_ID,
