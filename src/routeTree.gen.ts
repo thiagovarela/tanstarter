@@ -17,8 +17,9 @@ import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AppProjectsRouteImport } from './routes/_app/projects'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as AppSettingsOrganizationsRouteRouteImport } from './routes/_app/settings/organizations/route'
+import { Route as AppSettingsOrganizationsIndexRouteImport } from './routes/_app/settings/organizations/index'
 import { Route as ApiRestateV0SplatRouteImport } from './routes/api/restate/v0/$'
+import { Route as AppSettingsOrganizationsOrganizationIdRouteImport } from './routes/_app/settings/organizations/$organizationId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -58,10 +59,10 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppSettingsOrganizationsRouteRoute =
-  AppSettingsOrganizationsRouteRouteImport.update({
-    id: '/settings/organizations',
-    path: '/settings/organizations',
+const AppSettingsOrganizationsIndexRoute =
+  AppSettingsOrganizationsIndexRouteImport.update({
+    id: '/settings/organizations/',
+    path: '/settings/organizations/',
     getParentRoute: () => AppRoute,
   } as any)
 const ApiRestateV0SplatRoute = ApiRestateV0SplatRouteImport.update({
@@ -69,6 +70,12 @@ const ApiRestateV0SplatRoute = ApiRestateV0SplatRouteImport.update({
   path: '/api/restate/v0/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppSettingsOrganizationsOrganizationIdRoute =
+  AppSettingsOrganizationsOrganizationIdRouteImport.update({
+    id: '/settings/organizations/$organizationId',
+    path: '/settings/organizations/$organizationId',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -76,9 +83,10 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
-  '/settings/organizations': typeof AppSettingsOrganizationsRouteRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/settings/organizations/$organizationId': typeof AppSettingsOrganizationsOrganizationIdRoute
   '/api/restate/v0/$': typeof ApiRestateV0SplatRoute
+  '/settings/organizations': typeof AppSettingsOrganizationsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,9 +94,10 @@ export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
-  '/settings/organizations': typeof AppSettingsOrganizationsRouteRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/settings/organizations/$organizationId': typeof AppSettingsOrganizationsOrganizationIdRoute
   '/api/restate/v0/$': typeof ApiRestateV0SplatRoute
+  '/settings/organizations': typeof AppSettingsOrganizationsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -99,9 +108,10 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
-  '/_app/settings/organizations': typeof AppSettingsOrganizationsRouteRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_app/settings/organizations/$organizationId': typeof AppSettingsOrganizationsOrganizationIdRoute
   '/api/restate/v0/$': typeof ApiRestateV0SplatRoute
+  '/_app/settings/organizations/': typeof AppSettingsOrganizationsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,9 +121,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/api/health'
-    | '/settings/organizations'
     | '/api/auth/$'
+    | '/settings/organizations/$organizationId'
     | '/api/restate/v0/$'
+    | '/settings/organizations'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -121,9 +132,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/api/health'
-    | '/settings/organizations'
     | '/api/auth/$'
+    | '/settings/organizations/$organizationId'
     | '/api/restate/v0/$'
+    | '/settings/organizations'
   id:
     | '__root__'
     | '/'
@@ -133,9 +145,10 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_auth/register'
     | '/api/health'
-    | '/_app/settings/organizations'
     | '/api/auth/$'
+    | '/_app/settings/organizations/$organizationId'
     | '/api/restate/v0/$'
+    | '/_app/settings/organizations/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -205,11 +218,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/settings/organizations': {
-      id: '/_app/settings/organizations'
+    '/_app/settings/organizations/': {
+      id: '/_app/settings/organizations/'
       path: '/settings/organizations'
       fullPath: '/settings/organizations'
-      preLoaderRoute: typeof AppSettingsOrganizationsRouteRouteImport
+      preLoaderRoute: typeof AppSettingsOrganizationsIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/api/restate/v0/$': {
@@ -219,17 +232,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRestateV0SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/settings/organizations/$organizationId': {
+      id: '/_app/settings/organizations/$organizationId'
+      path: '/settings/organizations/$organizationId'
+      fullPath: '/settings/organizations/$organizationId'
+      preLoaderRoute: typeof AppSettingsOrganizationsOrganizationIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
   AppProjectsRoute: typeof AppProjectsRoute
-  AppSettingsOrganizationsRouteRoute: typeof AppSettingsOrganizationsRouteRoute
+  AppSettingsOrganizationsOrganizationIdRoute: typeof AppSettingsOrganizationsOrganizationIdRoute
+  AppSettingsOrganizationsIndexRoute: typeof AppSettingsOrganizationsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppProjectsRoute: AppProjectsRoute,
-  AppSettingsOrganizationsRouteRoute: AppSettingsOrganizationsRouteRoute,
+  AppSettingsOrganizationsOrganizationIdRoute:
+    AppSettingsOrganizationsOrganizationIdRoute,
+  AppSettingsOrganizationsIndexRoute: AppSettingsOrganizationsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

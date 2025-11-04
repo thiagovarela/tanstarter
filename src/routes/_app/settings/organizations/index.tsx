@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { getOrganizationsQueryOptions } from "./-components/queries";
 import { OrganizationsView } from "./-components/view";
 
-export const Route = createFileRoute("/_app/settings/organizations")({
+export const Route = createFileRoute("/_app/settings/organizations/")({
 	loader: async ({ context }) => {
 		await context.queryClient.ensureQueryData(getOrganizationsQueryOptions());
 	},

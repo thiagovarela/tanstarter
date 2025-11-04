@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { DataTable } from "@/components/table/data-table";
@@ -29,6 +30,7 @@ const columns: ColumnDef<Organization>[] = [
 
 export function OrganizationsView() {
 	const { data } = useOrganizationsQuery();
+	const navigate = useNavigate();
 
 	return (
 		<Card>
@@ -40,6 +42,12 @@ export function OrganizationsView() {
 					columns={columns}
 					data={data}
 					emptyMessage="No organizations yet."
+					onRowClick={(organization) =>
+						navigate({
+							to: "/settings/organizations/$organizationId",
+							params: { organizationId: organization.id },
+						})
+					}
 				/>
 			</CardContent>
 		</Card>

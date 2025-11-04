@@ -3,13 +3,13 @@ Welcome to Tanstarter!
 # Notes
 
 This is a fullstack boilerplate with a strong focus on SSR.
-This uses Bun all the way, including its APIs (SQL, S3, Env, Crypto, etc).
+~~This uses Bun all the way, including its APIs (SQL, S3, Env, Crypto, etc).~~ Keeping nodejs for now.
 
 There are two pieces of infrastructure: Postgres 18 and Restate (RocksDB behind the scenes).
 
 Restate covers durable execution, scheduling, background jobs, etc. There's some integration with better-auth (like sending emails and creating a default organization and project when a user is created).
 
-I'm using drizzle because of better-auth and decided to manage schemas using it, but every other DB interaction can be just via Bun SQL.
+I'm using drizzle because of better-auth and decided to manage schemas using it, but every other DB interaction can be just via ~~Bun SQL.~~ postgresjs
 
 
 # Getting Started

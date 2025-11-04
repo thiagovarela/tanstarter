@@ -4,7 +4,7 @@ import type { Session } from "@/lib/auth-client";
 
 type AuthContextType = {
 	user: User;
-	activeOrganizationId: string;
+	activeOrganizationId: string | null;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,7 +20,7 @@ export function AuthProvider({
 		<AuthContext.Provider
 			value={{
 				user: session.user,
-				activeOrganizationId: session.session.activeOrganizationId!,
+				activeOrganizationId: session.session.activeOrganizationId ?? null,
 			}}
 		>
 			{children}

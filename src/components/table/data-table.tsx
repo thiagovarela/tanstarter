@@ -4,7 +4,6 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-
 import {
 	Table,
 	TableBody,
@@ -13,17 +12,20 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 type DataTableProps<TData, TValue> = {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
 	emptyMessage?: string;
+	onRowClick?: (row: TData) => void;
 };
 
 export function DataTable<TData, TValue>({
 	columns,
 	data,
 	emptyMessage = "No results.",
+	onRowClick,
 }: DataTableProps<TData, TValue>) {
 	const table = useReactTable({
 		data,
@@ -55,6 +57,25 @@ export function DataTable<TData, TValue>({
 						table.getRowModel().rows.map((row) => (
 							<TableRow
 								key={row.id}
+								role={onRowClick ? "button" : undefined}
+								tabIndex={onRowClick ? 0 : undefined}
+								onClick={
+									onRowClick ? () => onRowClick(row.original) : undefined
+								}
+								onKeyDown={
+									onRowClick
+										? (event) => {
+												if (event.key === "Enter" || event.key === " ") {
+													event.preventDefault();
+													onRowClick(row.original);
+												}
+											}
+										: undefined
+								}
+								className={cn(
+									onRowClick &&
+										"cursor-pointer transition-colors hover:bg-muted/60",
+								)}
 								data-state={row.getIsSelected() && "selected"}
 							>
 								{row.getVisibleCells().map((cell) => (

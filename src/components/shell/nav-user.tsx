@@ -1,8 +1,10 @@
 "use client";
 
+import { useNavigate } from "@tanstack/react-router";
 import {
 	BadgeCheck,
 	Bell,
+	Building2,
 	ChevronsUpDown,
 	CreditCard,
 	LogOut,
@@ -32,6 +34,17 @@ import { authClient } from "@/lib/auth-client";
 export function NavUser() {
 	const { isMobile } = useSidebar();
 	const { user } = useSession();
+	const navigate = useNavigate();
+
+	const handleOrganizationsClick = () => {
+		navigate({ to: "/settings/organizations" });
+	};
+
+	const handleSignOut = async () => {
+		await authClient.signOut();
+
+		navigate({ to: "/" });
+	};
 
 	return (
 		<SidebarMenu>
@@ -92,9 +105,13 @@ export function NavUser() {
 								<Bell />
 								Notifications
 							</DropdownMenuItem>
+							<DropdownMenuItem onClick={handleOrganizationsClick}>
+								<Building2 />
+								Organizations
+							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem onClick={() => authClient.signOut()}>
+						<DropdownMenuItem onClick={() => void handleSignOut()}>
 							<LogOut />
 							Log out
 						</DropdownMenuItem>

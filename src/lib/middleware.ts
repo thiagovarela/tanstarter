@@ -22,10 +22,12 @@ export const requireSessionMiddleware = createMiddleware({
 			throw redirect({ to: "/login" });
 		}
 
+		const session = context.session;
+
 		return next({
 			context: {
-				session: context.session!,
-				user: context.session.user,
+				session,
+				user: session.user,
 			},
 		});
 	});
