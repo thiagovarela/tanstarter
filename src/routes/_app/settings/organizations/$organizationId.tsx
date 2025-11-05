@@ -1,8 +1,10 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
+import { type ClientUploadError, useUploadFile } from "better-upload/client";
 import { format } from "date-fns";
 import { MoreHorizontal, UploadCloud } from "lucide-react";
-import { Suspense, useMemo } from "react";
+import type { ChangeEvent } from "react";
+import { Suspense, useCallback, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { FieldInfo } from "@/components/form/field-info";
@@ -47,6 +49,24 @@ const settingsTabs: Array<{
 	disabled?: boolean;
 }> = [{ value: "team", label: "Team" }];
 
+const uploadMetadataSchema = z.object({
+	organizationId: z.uuid(),
+	objectKey: z.string(),
+});
+
+function isClientUploadError(
+	error: unknown,
+): error is ClientUploadError & Error {
+	return (
+		typeof error === "object" &&
+		error !== null &&
+		"type" in error &&
+		typeof (error as { type?: unknown }).type === "string" &&
+		"message" in error &&
+		typeof (error as { message?: unknown }).message === "string"
+	);
+}
+
 export const Route = createFileRoute(
 	"/_app/settings/organizations/$organizationId",
 )({
@@ -77,6 +97,68 @@ function OrganizationDetailRoute() {
 
 	useShellBreadcrumbs(breadcrumbs);
 
+	const upload = useUploadFile({
+		api: "/api/uploads",
+		route: "organization-logo",
+	});
+	const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+	const handleUpload = useCallback(
+		async (file: File) => {
+			try {
+				const result = await upload.uploadAsync(file, {
+					metadata: { organizationId },
+				});
+
+				const metadata = uploadMetadataSchema.parse(result.metadata);
+
+				await updateOrganization.mutateAsync({
+					organizationId,
+					name: organization.name,
+					logo: metadata.objectKey,
+				});
+
+				toast.success("Organization image updated.");
+			} catch (error) {
+				if (isClientUploadError(error)) {
+					toast.error(error.message);
+				} else {
+					toast.error("Failed to upload image.");
+					console.error(error);
+				}
+			} finally {
+				upload.reset();
+			}
+		},
+		[organizationId, organization.name, updateOrganization, upload],
+	);
+
+	const handleFileChange = useCallback(
+		(event: ChangeEvent<HTMLInputElement>) => {
+			const file = event.target.files?.[0];
+			if (!file) {
+				return;
+			}
+
+			void handleUpload(file);
+			event.target.value = "";
+		},
+		[handleUpload],
+	);
+
+	const handlePickFile = useCallback(() => {
+		fileInputRef.current?.click();
+	}, []);
+
+	const uploadButtonLabel =
+		upload.isPending && upload.progress > 0
+			? `Uploading ${Math.round(upload.progress * 100)}%`
+			: upload.isPending
+				? "Uploading..."
+				: "Update Image";
+
+	const disableLogoActions = upload.isPending || updateOrganization.isPending;
+
 	const form = useForm({
 		defaultValues: {
 			name: organization.name,
@@ -100,6 +182,9 @@ function OrganizationDetailRoute() {
 	});
 
 	const organizationInitial = organization.name?.charAt(0).toUpperCase() ?? "?";
+	const logo = organization.logo
+		? `${import.meta.env.VITE_MEDIA_PUBLIC_BASE_URL}${organization.logo}`
+		: undefined;
 
 	return (
 		<div className="space-y-6">
@@ -147,12 +232,25 @@ function OrganizationDetailRoute() {
 								<div className="flex flex-col gap-6 md:flex-row md:items-start">
 									<div className="flex flex-col items-center gap-3">
 										<Avatar className="h-20 w-20">
-											<AvatarImage src={organization.logo ?? undefined} />
+											<AvatarImage src={logo} />
 											<AvatarFallback>{organizationInitial}</AvatarFallback>
 										</Avatar>
-										<Button type="button" variant="outline" size="sm">
+										<input
+											ref={fileInputRef}
+											type="file"
+											accept="image/png,image/jpeg,image/webp"
+											className="hidden"
+											onChange={handleFileChange}
+										/>
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
+											onClick={handlePickFile}
+											disabled={disableLogoActions}
+										>
 											<UploadCloud className="size-4" />
-											Update Image
+											{uploadButtonLabel}
 										</Button>
 									</div>
 									<FieldGroup className="w-full space-y-5">

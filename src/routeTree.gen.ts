@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiUploadsRouteImport } from './routes/api/uploads'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
@@ -33,6 +34,11 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUploadsRoute = ApiUploadsRouteImport.update({
+  id: '/api/uploads',
+  path: '/api/uploads',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/uploads': typeof ApiUploadsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/settings/organizations/$organizationId': typeof AppSettingsOrganizationsOrganizationIdRoute
   '/api/restate/v0/$': typeof ApiRestateV0SplatRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/uploads': typeof ApiUploadsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/settings/organizations/$organizationId': typeof AppSettingsOrganizationsOrganizationIdRoute
   '/api/restate/v0/$': typeof ApiRestateV0SplatRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/uploads': typeof ApiUploadsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_app/settings/organizations/$organizationId': typeof AppSettingsOrganizationsOrganizationIdRoute
   '/api/restate/v0/$': typeof ApiRestateV0SplatRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/api/health'
+    | '/api/uploads'
     | '/api/auth/$'
     | '/settings/organizations/$organizationId'
     | '/api/restate/v0/$'
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/api/health'
+    | '/api/uploads'
     | '/api/auth/$'
     | '/settings/organizations/$organizationId'
     | '/api/restate/v0/$'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_auth/register'
     | '/api/health'
+    | '/api/uploads'
     | '/api/auth/$'
     | '/_app/settings/organizations/$organizationId'
     | '/api/restate/v0/$'
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   ApiHealthRoute: typeof ApiHealthRoute
+  ApiUploadsRoute: typeof ApiUploadsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRestateV0SplatRoute: typeof ApiRestateV0SplatRoute
 }
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/uploads': {
+      id: '/api/uploads'
+      path: '/api/uploads'
+      fullPath: '/api/uploads'
+      preLoaderRoute: typeof ApiUploadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/health': {
@@ -295,6 +315,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   ApiHealthRoute: ApiHealthRoute,
+  ApiUploadsRoute: ApiUploadsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRestateV0SplatRoute: ApiRestateV0SplatRoute,
 }

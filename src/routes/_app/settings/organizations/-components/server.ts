@@ -3,6 +3,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { createAuthServerFn } from "@/lib/auth-server-fn";
 import { sql } from "@/lib/db";
+import { buildPublicObjectUrl } from "@/lib/uploads/r2";
 import {
 	inviteOrganizationMemberSchema,
 	updateOrganizationSchema,
@@ -45,6 +46,12 @@ async function fetchOrganizationDetail(
 		throw new Error("Organization not found.");
 	}
 
+	const logoUrl = organization.logo
+		? organization.logo.startsWith("http")
+			? organization.logo
+			: buildPublicObjectUrl(organization.logo)
+		: null;
+
 	const members = await sql<OrganizationMemberRow[]>`
 		select
 			m.id,
@@ -63,7 +70,7 @@ async function fetchOrganizationDetail(
 		id: organization.id,
 		name: organization.name,
 		slug: organization.slug,
-		logo: organization.logo,
+		logo: logoUrl,
 		createdAt: new Date(organization.createdAt).toISOString(),
 		members: members.map((member) => ({
 			id: member.id,
@@ -118,9 +125,22 @@ export const updateOrganization = createAuthServerFn({ method: "POST" })
 	.handler(async ({ context, data }) => {
 		await ensureAdminMembership(context.user.id, data.organizationId);
 
+		const updatePayload: {
+			name: string;
+			logo?: string | null;
+		} = {
+			name: data.name,
+		};
+		const columns: Array<"name" | "logo"> = ["name"];
+
+		if (data.logo !== undefined) {
+			updatePayload.logo = data.logo;
+			columns.push("logo");
+		}
+
 		await sql`
 			update organizations
-			set name = ${data.name}
+			set ${sql(updatePayload, columns)}
 			where id = ${data.organizationId}
 		`;
 

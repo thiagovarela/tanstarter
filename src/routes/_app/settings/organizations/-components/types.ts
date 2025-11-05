@@ -27,6 +27,7 @@ export type OrganizationDetail = {
 export type UpdateOrganizationInput = {
 	organizationId: string;
 	name: string;
+	logo?: string | null;
 };
 
 export type InviteOrganizationMemberInput = {

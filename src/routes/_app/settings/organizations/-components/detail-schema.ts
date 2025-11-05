@@ -9,6 +9,13 @@ export const organizationNameSchema = z
 export const updateOrganizationSchema = z.object({
 	organizationId: z.uuid(),
 	name: organizationNameSchema,
+	logo: z
+		.string()
+		.trim()
+		.min(1, "Logo key is required")
+		.max(512, "Logo key is too long")
+		.nullable()
+		.optional(),
 });
 
 export const inviteOrganizationMemberSchema = z.object({

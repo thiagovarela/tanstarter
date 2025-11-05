@@ -19,6 +19,11 @@ const envSchema = z
 			.optional()
 			.default("http://localhost:3000/api/restate/v0"),
 		RESTATE_ADMIN_URL: z.url().optional().default("http://localhost:9070"),
+		R2_ACCESS_KEY_ID: z.string(),
+		R2_SECRET_ACCESS_KEY: z.string(),
+		R2_BUCKET_NAME: z.string(),
+		R2_ACCOUNT_ID: z.string(),
+		R2_PUBLIC_BASE_URL: z.url().optional(),
 	})
 	.strip();
 
@@ -32,6 +37,11 @@ const parsed = envSchema.safeParse({
 	BETTER_AUTH_URL: runtimeEnv.BETTER_AUTH_URL,
 	RESTATE_DEPLOYMENT_URL: runtimeEnv.RESTATE_DEPLOYMENT_URL,
 	RESTATE_ADMIN_URL: runtimeEnv.RESTATE_ADMIN_URL,
+	R2_ACCESS_KEY_ID: runtimeEnv.R2_ACCESS_KEY_ID,
+	R2_SECRET_ACCESS_KEY: runtimeEnv.R2_SECRET_ACCESS_KEY,
+	R2_BUCKET_NAME: runtimeEnv.R2_BUCKET_NAME,
+	R2_ACCOUNT_ID: runtimeEnv.R2_ACCOUNT_ID,
+	R2_PUBLIC_BASE_URL: runtimeEnv.R2_PUBLIC_BASE_URL,
 });
 
 if (!parsed.success) {
