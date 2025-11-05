@@ -98,10 +98,12 @@ async function ensureDefaultProject(organizationId: string) {
 }
 
 async function sendWelcomeEmail(user: { email: string; name?: string | null }) {
+	// This will now be logged through pino via the Restate logger transport
 	console.log(`Sending welcome email to ${user.email}`);
 }
 
 async function sendInvitationEmail(data: SendInviteInput) {
+	// This will now be logged through pino via the Restate logger transport
 	console.log("Sending verification email", data);
 }
 

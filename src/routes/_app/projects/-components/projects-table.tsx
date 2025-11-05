@@ -18,9 +18,6 @@ const columns: ColumnDef<ProjectListItem>[] = [
 		cell: ({ row }) => (
 			<div className="flex flex-col">
 				<span className="font-medium text-foreground">{row.original.name}</span>
-				<span className="text-sm text-muted-foreground">
-					{row.original.organizationName}
-				</span>
 			</div>
 		),
 	},
@@ -36,7 +33,7 @@ const columns: ColumnDef<ProjectListItem>[] = [
 		header: "Last updated",
 		cell: ({ row }) => (
 			<span className="text-muted-foreground">
-				{formatDistanceToNow(new Date(row.original.updatedAt), {
+				{formatDistanceToNow(row.original.updatedAt, {
 					addSuffix: true,
 				})}
 			</span>

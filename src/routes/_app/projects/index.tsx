@@ -12,8 +12,7 @@ import {
 
 export const Route = createFileRoute("/_app/projects/")({
 	loader: async ({ context }) => {
-		const organizationId =
-			context.session?.session?.activeOrganizationId ?? null;
+		const organizationId = context.session?.activeOrganizationId;
 		if (organizationId) {
 			await context.queryClient.ensureQueryData(
 				getProjectsQueryOptions(organizationId),
