@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { FieldInfo } from "@/components/form/field-info";
@@ -14,6 +14,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
+import { GoogleIcon } from "@/components/ui/google-icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
@@ -40,6 +41,8 @@ type RegisterProps = React.ComponentProps<"div"> & {
 
 export function Register({ className, invitationId, ...props }: RegisterProps) {
 	const navigate = useNavigate();
+	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
 	const invitationQuery = useQuery({
 		...(invitationId
 			? getInvitationDetailQueryOptions(invitationId)
@@ -56,6 +59,21 @@ export function Register({ className, invitationId, ...props }: RegisterProps) {
 		Boolean(invitation) &&
 		invitation?.status === "pending" &&
 		invitation.isExpired === false;
+
+	const handleGoogleSignUp = async () => {
+		setIsGoogleLoading(true);
+		try {
+			await authClient.signIn.social({
+				provider: "google",
+				callbackURL: "/projects",
+			});
+		} catch (error) {
+			console.error("Google sign-up error:", error);
+			toast.error("Failed to sign up with Google. Please try again.");
+		} finally {
+			setIsGoogleLoading(false);
+		}
+	};
 
 	const form = useForm({
 		defaultValues: {
@@ -179,112 +197,138 @@ export function Register({ className, invitationId, ...props }: RegisterProps) {
 					) : null}
 				</CardHeader>
 				<CardContent>
-					<form
-						onSubmit={(e) => {
-							e.preventDefault();
-							e.stopPropagation();
-							void form.handleSubmit();
-						}}
-					>
-						<FieldGroup>
-							<form.Field name="name">
-								{(field) => (
-									<div className="grid gap-2">
-										<Label htmlFor={field.name}>Name</Label>
-										<Input
-											id={field.name}
-											type="text"
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-										/>
-										<FieldInfo field={field} />
-									</div>
-								)}
-							</form.Field>
-							<form.Field name="email">
-								{(field) => (
-									<div className="grid gap-2">
-										<Label htmlFor={field.name}>Email</Label>
-										<Input
-											id={field.name}
-											type="email"
-											placeholder="m@example.com"
-											value={
-												invitationValid && invitation
-													? invitation.email
-													: field.state.value
-											}
-											onBlur={field.handleBlur}
-											onChange={(e) => {
-												if (invitationValid) {
-													return;
-												}
-												field.handleChange(e.target.value);
-											}}
-											disabled={invitationValid}
-										/>
-										{invitationValid ? (
-											<p className="text-muted-foreground text-xs">
-												Email locked to the invitation recipient.
-											</p>
-										) : null}
-										<FieldInfo field={field} />
-									</div>
-								)}
-							</form.Field>
-							<form.Field name="password">
-								{(field) => (
-									<div className="grid gap-2">
-										<Label htmlFor={field.name}>Password</Label>
-										<Input
-											id={field.name}
-											type="password"
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-										/>
-										<FieldInfo field={field} />
-									</div>
-								)}
-							</form.Field>
-							<form.Field name="confirmPassword">
-								{(field) => (
-									<div className="grid gap-2">
-										<Label htmlFor={field.name}>Confirm Password</Label>
-										<Input
-											id={field.name}
-											type="password"
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-										/>
-										<FieldInfo field={field} />
-									</div>
-								)}
-							</form.Field>
-							<Button
-								type="submit"
-								disabled={form.state.isSubmitting}
-								className="w-full"
-							>
-								{form.state.isSubmitting ? "Signing up..." : "Sign Up"}
-							</Button>
-							<div className="text-center text-sm">
-								Already have an account?{" "}
-								<Link
-									to="/login"
-									search={(current) => ({
-										...current,
-										invitationId: invitationId ?? current?.invitationId,
-									})}
-									className="underline underline-offset-4 hover:underline"
-								>
-									Log in
-								</Link>
+					<div className="grid gap-6">
+						{/* Google OAuth Button */}
+						<Button
+							variant="outline"
+							onClick={handleGoogleSignUp}
+							disabled={isGoogleLoading || form.state.isSubmitting}
+							className="w-full"
+						>
+							<GoogleIcon className="mr-2" />
+							{isGoogleLoading
+								? "Signing up with Google..."
+								: "Continue with Google"}
+						</Button>
+
+						<div className="relative">
+							<div className="absolute inset-0 flex items-center">
+								<span className="w-full border-t" />
 							</div>
-						</FieldGroup>
-					</form>
+							<div className="relative flex justify-center text-xs uppercase">
+								<span className="bg-background px-2 text-muted-foreground">
+									Or continue with email
+								</span>
+							</div>
+						</div>
+
+						<form
+							onSubmit={(e) => {
+								e.preventDefault();
+								e.stopPropagation();
+								void form.handleSubmit();
+							}}
+						>
+							<FieldGroup>
+								<form.Field name="name">
+									{(field) => (
+										<div className="grid gap-2">
+											<Label htmlFor={field.name}>Name</Label>
+											<Input
+												id={field.name}
+												type="text"
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+											/>
+											<FieldInfo field={field} />
+										</div>
+									)}
+								</form.Field>
+								<form.Field name="email">
+									{(field) => (
+										<div className="grid gap-2">
+											<Label htmlFor={field.name}>Email</Label>
+											<Input
+												id={field.name}
+												type="email"
+												placeholder="m@example.com"
+												value={
+													invitationValid && invitation
+														? invitation.email
+														: field.state.value
+												}
+												onBlur={field.handleBlur}
+												onChange={(e) => {
+													if (invitationValid) {
+														return;
+													}
+													field.handleChange(e.target.value);
+												}}
+												disabled={invitationValid}
+											/>
+											{invitationValid ? (
+												<p className="text-muted-foreground text-xs">
+													Email locked to the invitation recipient.
+												</p>
+											) : null}
+											<FieldInfo field={field} />
+										</div>
+									)}
+								</form.Field>
+								<form.Field name="password">
+									{(field) => (
+										<div className="grid gap-2">
+											<Label htmlFor={field.name}>Password</Label>
+											<Input
+												id={field.name}
+												type="password"
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+											/>
+											<FieldInfo field={field} />
+										</div>
+									)}
+								</form.Field>
+								<form.Field name="confirmPassword">
+									{(field) => (
+										<div className="grid gap-2">
+											<Label htmlFor={field.name}>Confirm Password</Label>
+											<Input
+												id={field.name}
+												type="password"
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+											/>
+											<FieldInfo field={field} />
+										</div>
+									)}
+								</form.Field>
+								<Button
+									type="submit"
+									disabled={form.state.isSubmitting}
+									className="w-full"
+								>
+									{form.state.isSubmitting ? "Signing up..." : "Sign Up"}
+								</Button>
+								<div className="text-center text-sm">
+									Already have an account?{" "}
+									<Link
+										to="/login"
+										search={(current) => ({
+											...current,
+											invitationId: invitationId ?? current?.invitationId,
+										})}
+										className="underline underline-offset-4 hover:underline"
+									>
+										Log in
+									</Link>
+								</div>
+							</FieldGroup>
+						</form>
+					</div>
 				</CardContent>
 			</Card>
 		</div>

@@ -98,7 +98,6 @@ export const auth = betterAuth({
 		google: {
 			clientId: env.GOOGLE_ID_CLIENT_ID,
 			clientSecret: env.GOOGLE_ID_CLIENT_SECRET,
-			redirectURI: "api/auth/google/callback",
 			scope: ["openid", "profile", "email"],
 		},
 	},
