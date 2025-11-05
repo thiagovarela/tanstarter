@@ -1,5 +1,5 @@
 import type { User } from "better-auth";
-import { createContext, type ReactNode } from "react";
+import { createContext, type ReactNode, useContext } from "react";
 import type { Session } from "@/lib/auth-client";
 
 type AuthContextType = {
@@ -26,4 +26,12 @@ export function AuthProvider({
 			{children}
 		</AuthContext.Provider>
 	);
+}
+
+export function useAuth() {
+	const context = useContext(AuthContext);
+	if (!context) {
+		throw new Error("useAuth must be used within AuthProvider");
+	}
+	return context;
 }

@@ -6,7 +6,6 @@ import {
 	Route as RouteIcon,
 	ServerCog,
 	ShieldCheck,
-	Sparkles,
 	Workflow,
 	Zap,
 } from "lucide-react";

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Suspense } from "react";
-
+import { Suspense, useMemo } from "react";
+import { useShellBreadcrumbs } from "@/components/shell/shell-breadcrumb-context";
 import { getOrganizationsQueryOptions } from "./-components/queries";
 import { OrganizationsView } from "./-components/view";
 
@@ -12,6 +12,9 @@ export const Route = createFileRoute("/_app/settings/organizations/")({
 });
 
 function OrganizationsRouteComponent() {
+	const breadcrumbs = useMemo(() => [{ label: "Organizations" }], []);
+	useShellBreadcrumbs(breadcrumbs);
+
 	return (
 		<Suspense fallback={<div>Loading organizations...</div>}>
 			<OrganizationsView />

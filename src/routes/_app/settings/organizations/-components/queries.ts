@@ -1,6 +1,20 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { listOrganizations } from "./server";
-import type { Organization } from "./types";
+import {
+	useMutation,
+	useQueryClient,
+	useSuspenseQuery,
+} from "@tanstack/react-query";
+import {
+	getOrganizationDetail,
+	inviteOrganizationMember,
+	listOrganizations,
+	updateOrganization,
+} from "./server";
+import type {
+	InviteOrganizationMemberInput,
+	Organization,
+	OrganizationDetail,
+	UpdateOrganizationInput,
+} from "./types";
 
 const organizationsQueryKey = ["settings", "organizations"] as const;
 
@@ -11,4 +25,53 @@ export const getOrganizationsQueryOptions = () => ({
 
 export function useOrganizationsQuery() {
 	return useSuspenseQuery(getOrganizationsQueryOptions());
+}
+
+export const organizationDetailQueryKey = (organizationId: string) =>
+	["settings", "organizations", organizationId] as const;
+
+export const getOrganizationDetailQueryOptions = (organizationId: string) => ({
+	queryKey: organizationDetailQueryKey(organizationId),
+	queryFn: async (): Promise<OrganizationDetail> =>
+		getOrganizationDetail({ data: { organizationId } }),
+});
+
+export function useOrganizationDetailQuery(organizationId: string) {
+	return useSuspenseQuery(getOrganizationDetailQueryOptions(organizationId));
+}
+
+export function useUpdateOrganizationMutation(organizationId: string) {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (input: UpdateOrganizationInput) =>
+			updateOrganization({ data: input }),
+		onSuccess: (organization) => {
+			queryClient.setQueryData(
+				organizationDetailQueryKey(organizationId),
+				organization,
+			);
+			void queryClient.invalidateQueries({
+				queryKey: organizationsQueryKey,
+			});
+		},
+	});
+}
+
+export function useInviteOrganizationMemberMutation(organizationId: string) {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (input: InviteOrganizationMemberInput) =>
+			inviteOrganizationMember({ data: input }),
+		onSuccess: (organization) => {
+			queryClient.setQueryData(
+				organizationDetailQueryKey(organizationId),
+				organization,
+			);
+			void queryClient.invalidateQueries({
+				queryKey: organizationsQueryKey,
+			});
+		},
+	});
 }

@@ -1,21 +1,14 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { format } from "date-fns";
-import { Check, MoreHorizontal, UploadCloud, X } from "lucide-react";
-import { Suspense } from "react";
+import { MoreHorizontal, UploadCloud } from "lucide-react";
+import { Suspense, useMemo } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { FieldInfo } from "@/components/form/field-info";
+import { useShellBreadcrumbs } from "@/components/shell/shell-breadcrumb-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import {
-	Breadcrumb,
-	BreadcrumbItem,
-	BreadcrumbLink,
-	BreadcrumbList,
-	BreadcrumbPage,
-	BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -36,12 +29,13 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { organizationNameSchema } from "./-components/detail-schema";
+import { InviteMemberDialog } from "./-components/invite-member-dialog";
 import {
 	getOrganizationDetailQueryOptions,
 	useOrganizationDetailQuery,
 	useUpdateOrganizationMutation,
-} from "./-components/detail-queries";
-import { organizationNameSchema } from "./-components/detail-schema";
+} from "./-components/queries";
 
 const updateFormSchema = z.object({
 	name: organizationNameSchema,
@@ -73,6 +67,16 @@ function OrganizationDetailRoute() {
 	const { data: organization } = useOrganizationDetailQuery(organizationId);
 	const updateOrganization = useUpdateOrganizationMutation(organizationId);
 
+	const breadcrumbs = useMemo(
+		() => [
+			{ label: "Organizations", to: "/settings/organizations" },
+			{ label: organization.name },
+		],
+		[organization.name],
+	);
+
+	useShellBreadcrumbs(breadcrumbs);
+
 	const form = useForm({
 		defaultValues: {
 			name: organization.name,
@@ -100,19 +104,6 @@ function OrganizationDetailRoute() {
 	return (
 		<div className="space-y-6">
 			<div className="space-y-3">
-				<Breadcrumb>
-					<BreadcrumbList>
-						<BreadcrumbItem>
-							<BreadcrumbLink asChild>
-								<Link to="/settings/organizations">Organizations</Link>
-							</BreadcrumbLink>
-						</BreadcrumbItem>
-						<BreadcrumbSeparator />
-						<BreadcrumbItem>
-							<BreadcrumbPage>{organization.name}</BreadcrumbPage>
-						</BreadcrumbItem>
-					</BreadcrumbList>
-				</Breadcrumb>
 				<div className="flex flex-col gap-2">
 					<h1 className="text-foreground text-3xl font-semibold tracking-tight">
 						Settings
@@ -203,9 +194,7 @@ function OrganizationDetailRoute() {
 									Invite teammates and manage their access.
 								</CardDescription>
 							</div>
-							<Button type="button" variant="outline">
-								Invite
-							</Button>
+							<InviteMemberDialog organizationId={organizationId} />
 						</CardHeader>
 						<CardContent className="space-y-4">
 							<div className="rounded-md border">
@@ -214,7 +203,6 @@ function OrganizationDetailRoute() {
 										<TableRow>
 											<TableHead>Name</TableHead>
 											<TableHead>Role</TableHead>
-											<TableHead>Enabled MFA</TableHead>
 											<TableHead className="text-right">Actions</TableHead>
 										</TableRow>
 									</TableHeader>
@@ -262,13 +250,6 @@ function OrganizationDetailRoute() {
 																{member.role}
 															</Badge>
 														</TableCell>
-														<TableCell>
-															{member.mfaEnabled ? (
-																<Check className="size-4 text-emerald-500" />
-															) : (
-																<X className="size-4 text-muted-foreground" />
-															)}
-														</TableCell>
 														<TableCell className="text-right">
 															<Button type="button" variant="ghost" size="icon">
 																<MoreHorizontal className="size-4" />
@@ -281,7 +262,7 @@ function OrganizationDetailRoute() {
 										) : (
 											<TableRow>
 												<TableCell
-													colSpan={4}
+													colSpan={3}
 													className="text-muted-foreground h-20 text-center"
 												>
 													No members yet.

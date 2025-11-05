@@ -4,11 +4,12 @@ import { auth } from "@/lib/auth";
 
 export const sessionMiddleware = createMiddleware().server(
 	async ({ next, request }) => {
-		console.log(request.url);
 		const session = await auth.api.getSession({ headers: request.headers });
 
 		return next({
-			context: { session },
+			context: {
+				session,
+			},
 		});
 	},
 );
