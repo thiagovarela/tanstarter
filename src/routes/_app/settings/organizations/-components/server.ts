@@ -1,6 +1,7 @@
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
+import { requireOrgPermission } from "@/lib/auth/org-permissions";
 import { createAuthServerFn } from "@/lib/auth-server-fn";
 import { sql } from "@/lib/db";
 import { buildPublicObjectUrl } from "@/lib/uploads/r2";
@@ -84,22 +85,6 @@ async function fetchOrganizationDetail(
 	};
 }
 
-async function ensureAdminMembership(userId: string, organizationId: string) {
-	const [membership] = await sql<{ role: string }[]>`
-		select role
-		from members
-		where organization_id = ${organizationId} and user_id = ${userId}
-	`;
-
-	if (!membership) {
-		throw new Error("You do not have access to this organization.");
-	}
-
-	if (membership.role !== "owner") {
-		throw new Error("You do not have permission to update this organization.");
-	}
-}
-
 export const listOrganizations = createAuthServerFn().handler(
 	async ({ context }): Promise<Organization[]> => {
 		const userId = context.user.id;
@@ -123,7 +108,14 @@ export const getOrganizationDetail = createAuthServerFn()
 export const updateOrganization = createAuthServerFn({ method: "POST" })
 	.inputValidator(updateOrganizationSchema)
 	.handler(async ({ context, data }) => {
-		await ensureAdminMembership(context.user.id, data.organizationId);
+		await requireOrgPermission({
+			userId: context.user.id,
+			organizationId: data.organizationId,
+			permissions: {
+				organization: "update",
+			},
+			errorMessage: "You do not have permission to update this organization.",
+		});
 
 		const updatePayload: {
 			name: string;
@@ -150,6 +142,15 @@ export const updateOrganization = createAuthServerFn({ method: "POST" })
 export const inviteOrganizationMember = createAuthServerFn({ method: "POST" })
 	.inputValidator(inviteOrganizationMemberSchema)
 	.handler(async ({ context, data }) => {
+		await requireOrgPermission({
+			userId: context.user.id,
+			organizationId: data.organizationId,
+			permissions: {
+				invitation: "create",
+			},
+			errorMessage: "You do not have permission to invite members.",
+		});
+
 		await fetchOrganizationDetail(context.user.id, data.organizationId);
 
 		const request = getRequest();

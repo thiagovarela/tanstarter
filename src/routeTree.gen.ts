@@ -17,7 +17,7 @@ import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthAcceptInviteRouteImport } from './routes/_auth/accept-invite'
-import { Route as AppProjectsRouteImport } from './routes/_app/projects'
+import { Route as AppProjectsIndexRouteImport } from './routes/_app/projects/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AppSettingsOrganizationsIndexRouteImport } from './routes/_app/settings/organizations/index'
 import { Route as ApiRestateV0SplatRouteImport } from './routes/api/restate/v0/$'
@@ -61,9 +61,9 @@ const AuthAcceptInviteRoute = AuthAcceptInviteRouteImport.update({
   path: '/accept-invite',
   getParentRoute: () => AuthRoute,
 } as any)
-const AppProjectsRoute = AppProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
+const AppProjectsIndexRoute = AppProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
   getParentRoute: () => AppRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -91,26 +91,26 @@ const AppSettingsOrganizationsOrganizationIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/projects': typeof AppProjectsRoute
   '/accept-invite': typeof AuthAcceptInviteRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
   '/api/uploads': typeof ApiUploadsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/projects': typeof AppProjectsIndexRoute
   '/settings/organizations/$organizationId': typeof AppSettingsOrganizationsOrganizationIdRoute
   '/api/restate/v0/$': typeof ApiRestateV0SplatRoute
   '/settings/organizations': typeof AppSettingsOrganizationsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/projects': typeof AppProjectsRoute
   '/accept-invite': typeof AuthAcceptInviteRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
   '/api/uploads': typeof ApiUploadsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/projects': typeof AppProjectsIndexRoute
   '/settings/organizations/$organizationId': typeof AppSettingsOrganizationsOrganizationIdRoute
   '/api/restate/v0/$': typeof ApiRestateV0SplatRoute
   '/settings/organizations': typeof AppSettingsOrganizationsIndexRoute
@@ -120,13 +120,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
-  '/_app/projects': typeof AppProjectsRoute
   '/_auth/accept-invite': typeof AuthAcceptInviteRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/api/health': typeof ApiHealthRoute
   '/api/uploads': typeof ApiUploadsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_app/projects/': typeof AppProjectsIndexRoute
   '/_app/settings/organizations/$organizationId': typeof AppSettingsOrganizationsOrganizationIdRoute
   '/api/restate/v0/$': typeof ApiRestateV0SplatRoute
   '/_app/settings/organizations/': typeof AppSettingsOrganizationsIndexRoute
@@ -135,26 +135,26 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/projects'
     | '/accept-invite'
     | '/login'
     | '/register'
     | '/api/health'
     | '/api/uploads'
     | '/api/auth/$'
+    | '/projects'
     | '/settings/organizations/$organizationId'
     | '/api/restate/v0/$'
     | '/settings/organizations'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/projects'
     | '/accept-invite'
     | '/login'
     | '/register'
     | '/api/health'
     | '/api/uploads'
     | '/api/auth/$'
+    | '/projects'
     | '/settings/organizations/$organizationId'
     | '/api/restate/v0/$'
     | '/settings/organizations'
@@ -163,13 +163,13 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/_auth'
-    | '/_app/projects'
     | '/_auth/accept-invite'
     | '/_auth/login'
     | '/_auth/register'
     | '/api/health'
     | '/api/uploads'
     | '/api/auth/$'
+    | '/_app/projects/'
     | '/_app/settings/organizations/$organizationId'
     | '/api/restate/v0/$'
     | '/_app/settings/organizations/'
@@ -243,11 +243,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAcceptInviteRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_app/projects': {
-      id: '/_app/projects'
+    '/_app/projects/': {
+      id: '/_app/projects/'
       path: '/projects'
       fullPath: '/projects'
-      preLoaderRoute: typeof AppProjectsRouteImport
+      preLoaderRoute: typeof AppProjectsIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/api/auth/$': {
@@ -282,13 +282,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
-  AppProjectsRoute: typeof AppProjectsRoute
+  AppProjectsIndexRoute: typeof AppProjectsIndexRoute
   AppSettingsOrganizationsOrganizationIdRoute: typeof AppSettingsOrganizationsOrganizationIdRoute
   AppSettingsOrganizationsIndexRoute: typeof AppSettingsOrganizationsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppProjectsRoute: AppProjectsRoute,
+  AppProjectsIndexRoute: AppProjectsIndexRoute,
   AppSettingsOrganizationsOrganizationIdRoute:
     AppSettingsOrganizationsOrganizationIdRoute,
   AppSettingsOrganizationsIndexRoute: AppSettingsOrganizationsIndexRoute,

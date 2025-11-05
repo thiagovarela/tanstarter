@@ -8,6 +8,7 @@ import { reactStartCookies } from "better-auth/react-start";
 import { client } from "@/lib/drizzle";
 import * as schema from "@/lib/schema/auth";
 
+import { ac, roles } from "./auth/permissions";
 import { env } from "./env";
 import {
 	ensureDefaultOrganizationForUser,
@@ -106,6 +107,8 @@ export const auth = betterAuth({
 		lastLoginMethod({ storeInDatabase: true }),
 		admin(),
 		organization({
+			ac,
+			roles,
 			sendInvitationEmail: async (data) => {
 				await restateClient.serviceClient(Accounts).sendOrganizationInvite(
 					{

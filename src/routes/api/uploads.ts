@@ -8,7 +8,7 @@ import {
 import { z } from "zod";
 
 import { auth } from "@/lib/auth";
-import { sql } from "@/lib/db";
+import { requireOrgPermission } from "@/lib/auth/org-permissions";
 import { env } from "@/lib/env";
 import { buildPublicObjectUrl, client } from "@/lib/uploads/r2";
 
@@ -18,24 +18,6 @@ const clientMetadataSchema = z.object({
 
 const ALLOWED_FILE_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
-
-async function ensureOrganizationOwner(userId: string, organizationId: string) {
-	const [membership] = await sql<{ role: string }[]>`
-		select role
-		from members
-		where organization_id = ${organizationId} and user_id = ${userId}
-	`;
-
-	if (!membership) {
-		throw new RejectUpload("You do not have access to this organization.");
-	}
-
-	if (membership.role !== "owner") {
-		throw new RejectUpload(
-			"You do not have permission to update this organization.",
-		);
-	}
-}
 
 function inferExtension(fileName: string, mimeType: string): string {
 	const mimeExtension: Record<string, string> = {
@@ -64,7 +46,20 @@ const organizationLogoRoute = route({
 
 		const metadata = clientMetadataSchema.parse(clientMetadata);
 
-		await ensureOrganizationOwner(session.user.id, metadata.organizationId);
+		try {
+			await requireOrgPermission({
+				userId: session.user.id,
+				organizationId: metadata.organizationId,
+				permissions: {
+					organization: "update",
+				},
+			});
+		} catch (error) {
+			if (error instanceof Error) {
+				throw new RejectUpload(error.message);
+			}
+			throw error;
+		}
 
 		const extension = inferExtension(file.name, file.type);
 		const objectKey = [

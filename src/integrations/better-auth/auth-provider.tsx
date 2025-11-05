@@ -5,6 +5,8 @@ import type { Session } from "@/lib/auth-client";
 type AuthContextType = {
 	user: User;
 	activeOrganizationId: string | null;
+	activeOrganizationRole: string | null;
+	activeOrganizationRoles: string[];
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,11 +18,25 @@ export function AuthProvider({
 	children: ReactNode;
 	session: Session;
 }) {
+	const activeOrganizationId = session.session.activeOrganizationId ?? null;
+	const augmentedSession = session.session as Session["session"] & {
+		activeOrganizationRole?: string | null;
+		activeOrganizationRoles?: string[];
+	};
+
+	const activeOrganizationRole =
+		augmentedSession.activeOrganizationRole ?? null;
+	const activeOrganizationRoles =
+		augmentedSession.activeOrganizationRoles ??
+		(activeOrganizationRole ? [activeOrganizationRole] : []);
+
 	return (
 		<AuthContext.Provider
 			value={{
 				user: session.user,
-				activeOrganizationId: session.session.activeOrganizationId ?? null,
+				activeOrganizationId,
+				activeOrganizationRole,
+				activeOrganizationRoles,
 			}}
 		>
 			{children}
