@@ -105,7 +105,7 @@ function App() {
 							</p>
 							<div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
 								<a
-									href={`#${getStartedId}`}
+									href="/login"
 									className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-cyan-500/30 transition-colors hover:bg-cyan-400"
 								>
 									Get Started
