@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { requireOrgPermission } from "@/lib/auth/org-permissions";
 import { createAuthServerFn } from "@/lib/auth-server-fn";
 import { sql } from "@/lib/db";
+import { requireOrgUserMiddleware } from "@/lib/middleware";
 import { buildPublicObjectUrl } from "@/lib/uploads/r2";
 import {
 	inviteOrganizationMemberSchema,
@@ -106,6 +107,7 @@ export const getOrganizationDetail = createAuthServerFn()
 	});
 
 export const updateOrganization = createAuthServerFn({ method: "POST" })
+	.middleware([requireOrgUserMiddleware])
 	.inputValidator(updateOrganizationSchema)
 	.handler(async ({ context, data }) => {
 		await requireOrgPermission({
@@ -140,6 +142,7 @@ export const updateOrganization = createAuthServerFn({ method: "POST" })
 	});
 
 export const inviteOrganizationMember = createAuthServerFn({ method: "POST" })
+	.middleware([requireOrgUserMiddleware])
 	.inputValidator(inviteOrganizationMemberSchema)
 	.handler(async ({ context, data }) => {
 		await requireOrgPermission({

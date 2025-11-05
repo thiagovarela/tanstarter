@@ -1,8 +1,9 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useToastMutation } from "@/integrations/tanstack-query/mutation";
 import type { ProjectListResponse } from "./server";
-import { listActiveOrganizationProjects } from "./server";
+import { createProject, listActiveOrganizationProjects } from "./server";
 
-const projectsQueryKey = (organizationId: string) =>
+export const projectsQueryKey = (organizationId: string) =>
 	["projects", "list", organizationId] as const;
 
 export const getProjectsQueryOptions = (organizationId: string) => ({
@@ -13,4 +14,16 @@ export const getProjectsQueryOptions = (organizationId: string) => ({
 
 export function useProjectsQuery(organizationId: string) {
 	return useSuspenseQuery(getProjectsQueryOptions(organizationId));
+}
+
+export function useCreateProjectMutation(organizationId: string) {
+	return useToastMutation<
+		{ name: string },
+		{ project: { id: string; name: string } }
+	>({
+		mutationFn: async (input) => createProject({ data: input }),
+		successMessage: (data) => `Project "${data.project.name}" created`,
+		errorMessage: "Failed to create project",
+		invalidateKeys: [projectsQueryKey(organizationId)],
+	});
 }

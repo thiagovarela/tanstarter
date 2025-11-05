@@ -58,3 +58,34 @@ export const requireSessionMiddleware = createMiddleware({
 			},
 		});
 	});
+
+export const requireOrgUserMiddleware = createMiddleware({
+	type: "function",
+})
+	.middleware([requireSessionMiddleware])
+	.server(async ({ context, next }) => {
+		const session = context.session;
+		const activeOrganizationId = session.session.activeOrganizationId ?? null;
+
+		if (!activeOrganizationId || !session.user?.id) {
+			throw redirect({ to: "/settings/organizations" });
+		}
+
+		const membership = await getOrganizationMembership({
+			userId: session.user.id,
+			organizationId: activeOrganizationId,
+		});
+
+		if (!membership) {
+			throw redirect({ to: "/settings/organizations" });
+		}
+
+		return next({
+			context: {
+				...context,
+				activeOrganizationId,
+				activeOrganizationRole: listMembershipRoles(membership.role)[0] ?? null,
+				activeOrganizationRoles: listMembershipRoles(membership.role),
+			},
+		});
+	});
