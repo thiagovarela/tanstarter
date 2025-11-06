@@ -1,6 +1,6 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, useMemo, useState } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useShellBreadcrumbs } from "@/components/shell/shell-breadcrumb-context";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/integrations/better-auth/auth-provider";

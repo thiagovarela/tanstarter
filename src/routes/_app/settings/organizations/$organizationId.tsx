@@ -1,4 +1,5 @@
 import { useForm } from "@tanstack/react-form";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { type ClientUploadError, useUploadFile } from "better-upload/client";
 import { format } from "date-fns";
@@ -37,7 +38,6 @@ import {
 	getOrganizationDetailQueryOptions,
 	useUpdateOrganizationMutation,
 } from "./-components/queries";
-import { useSuspenseQuery } from "@tanstack/react-query";
 
 const updateFormSchema = z.object({
 	name: organizationNameSchema,
