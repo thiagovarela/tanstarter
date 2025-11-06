@@ -35,9 +35,9 @@ import { organizationNameSchema } from "./-components/detail-schema";
 import { InviteMemberDialog } from "./-components/invite-member-dialog";
 import {
 	getOrganizationDetailQueryOptions,
-	useOrganizationDetailQuery,
 	useUpdateOrganizationMutation,
 } from "./-components/queries";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 const updateFormSchema = z.object({
 	name: organizationNameSchema,
@@ -84,7 +84,9 @@ export const Route = createFileRoute(
 
 function OrganizationDetailRoute() {
 	const { organizationId } = Route.useParams();
-	const { data: organization } = useOrganizationDetailQuery(organizationId);
+	const { data: organization } = useSuspenseQuery(
+		getOrganizationDetailQueryOptions(organizationId),
+	);
 	const updateOrganization = useUpdateOrganizationMutation(organizationId);
 
 	const breadcrumbs = useMemo(

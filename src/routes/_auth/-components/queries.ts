@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { getInvitationForLink } from "./server";
 import type { InvitationLinkDetail } from "./types";
 
@@ -10,11 +9,3 @@ export const getInvitationDetailQueryOptions = (invitationId: string) => ({
 	queryFn: async (): Promise<InvitationLinkDetail | null> =>
 		getInvitationForLink({ data: { invitationId } }),
 });
-
-export function useInvitationDetailQuery(invitationId: string) {
-	return useQuery({
-		...getInvitationDetailQueryOptions(invitationId),
-		enabled: Boolean(invitationId),
-		staleTime: 60_000,
-	});
-}

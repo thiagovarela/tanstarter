@@ -1,8 +1,4 @@
-import {
-	useMutation,
-	useQueryClient,
-	useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
 	getOrganizationDetail,
 	inviteOrganizationMember,
@@ -23,10 +19,6 @@ export const getOrganizationsQueryOptions = () => ({
 	queryFn: async (): Promise<Organization[]> => listOrganizations(),
 });
 
-export function useOrganizationsQuery() {
-	return useSuspenseQuery(getOrganizationsQueryOptions());
-}
-
 export const organizationDetailQueryKey = (organizationId: string) =>
 	["settings", "organizations", organizationId] as const;
 
@@ -35,10 +27,6 @@ export const getOrganizationDetailQueryOptions = (organizationId: string) => ({
 	queryFn: async (): Promise<OrganizationDetail> =>
 		getOrganizationDetail({ data: { organizationId } }),
 });
-
-export function useOrganizationDetailQuery(organizationId: string) {
-	return useSuspenseQuery(getOrganizationDetailQueryOptions(organizationId));
-}
 
 export function useUpdateOrganizationMutation(organizationId: string) {
 	const queryClient = useQueryClient();

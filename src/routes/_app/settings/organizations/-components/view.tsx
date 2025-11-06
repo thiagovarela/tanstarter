@@ -1,9 +1,10 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { DataTable } from "@/components/table/data-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useOrganizationsQuery } from "./queries";
+import { getOrganizationsQueryOptions } from "./queries";
 import type { Organization } from "./types";
 
 const columns: ColumnDef<Organization>[] = [
@@ -29,7 +30,7 @@ const columns: ColumnDef<Organization>[] = [
 ];
 
 export function OrganizationsView() {
-	const { data } = useOrganizationsQuery();
+	const { data } = useSuspenseQuery(getOrganizationsQueryOptions());
 	const navigate = useNavigate();
 
 	return (

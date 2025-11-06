@@ -1,4 +1,3 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useToastMutation } from "@/integrations/tanstack-query/mutation";
 import type { ProjectListResponse } from "./server";
 import { createProject, listActiveOrganizationProjects } from "./server";
@@ -11,10 +10,6 @@ export const getProjectsQueryOptions = (organizationId: string) => ({
 	queryFn: async (): Promise<ProjectListResponse> =>
 		listActiveOrganizationProjects(),
 });
-
-export function useProjectsQuery(organizationId: string) {
-	return useSuspenseQuery(getProjectsQueryOptions(organizationId));
-}
 
 export function useCreateProjectMutation(organizationId: string) {
 	return useToastMutation<

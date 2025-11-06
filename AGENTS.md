@@ -1,3 +1,5 @@
+The year is 2025.
+
 # Tanstarter Agent Guidelines
 
 ## Goal
@@ -68,3 +70,111 @@ When coding, always explain what you are doing and why your job is to help the u
 - **DB**: Drizzle ORM with TypeScript types
 - **Router**: TanStack Router with file-based routing
 - **Workflows**: Restate for durable service orchestration with Zod schemas
+
+
+## Coding Guidelines
+
+### Auth
+
+Every route under "_app" is protected and there is a session and activeOrganizationId.
+This is validated via middleware and auth context.
+
+### Tanstack Start + Query
+
+You should always create query options and suspense query hooks.
+This will be used on Router loaders.
+
+```typescript
+export const getProjectsQueryOptions = (organizationId: string) => ({
+	queryKey: projectsQueryKey(organizationId),
+	queryFn: async (): Promise<ProjectListResponse> =>
+		listActiveOrganizationProjects(),
+});
+
+// Do
+const projects = useSuspenseQuery(getProjectsQueryOptions(organizationId));
+
+// Don't
+export function useProjectsQuery(organizationId: string) {
+	return useSuspenseQuery(getProjectsQueryOptions(organizationId));
+}
+
+// Route
+export const Route = createFileRoute("/_app/projects/")({
+	loader: async ({ context }) => {
+		const organizationId = context.session.activeOrganizationId;
+		if (organizationId) {
+			await context.queryClient.ensureQueryData(
+				getProjectsQueryOptions(organizationId),
+			);
+		}
+	},
+	component: ProjectsRouteComponent,
+});
+```
+
+
+
+### Zod
+
+```typescript
+// By default, fields are required.
+const userSchema = z.object({
+  name: z.string(),
+  age: z.number(),
+});
+
+// Use .optional() to define optional fields.
+const userSchema = z.object({
+  name: z.string(),
+  age: z.number().optional(),
+});
+
+// String formats
+z.email();
+z.uuid();
+z.url();
+z.httpUrl();       // http or https URLs only
+z.hostname();
+z.emoji();         // validates a single emoji character
+z.base64();
+z.base64url();
+z.hex();
+z.jwt();
+z.nanoid();
+z.cuid();
+z.cuid2();
+z.ulid();
+z.ipv4();
+z.ipv6();
+z.cidrv4();        // ipv4 CIDR block
+z.cidrv6();        // ipv6 CIDR block
+z.hash("sha256");  // or "sha1", "sha384", "sha512", "md5"
+z.iso.date();
+z.iso.time();
+z.iso.datetime();
+z.iso.duration();
+
+// ISO Datetimes
+const datetime = z.iso.datetime();
+
+datetime.parse("2020-01-01T06:15:00Z"); // ✅
+datetime.parse("2020-01-01T06:15:00.123Z"); // ✅
+datetime.parse("2020-01-01T06:15:00.123456Z"); // ✅ (arbitrary precision)
+datetime.parse("2020-01-01T06:15:00+02:00"); // ❌ (offsets not allowed)
+datetime.parse("2020-01-01T06:15:00"); // ❌ (local not allowed)
+```
+
+## Postgres.js
+
+```typescript
+// Transform the column names only to camel case
+// (for the results that are returned from the query)
+postgres({ transform: postgres.toCamel })
+
+await sql`CREATE TABLE IF NOT EXISTS camel_case (a_test INTEGER)`
+await sql`INSERT INTO camel_case ${ sql([{ a_test: 1 }]) }`
+const data = await sql`SELECT a_test FROM camel_case`
+
+console.log(data) // [ { aTest: 1 } ]
+```

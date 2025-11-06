@@ -1,14 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, useMemo, useState } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useShellBreadcrumbs } from "@/components/shell/shell-breadcrumb-context";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/integrations/better-auth/auth-provider";
 import { ProjectCreateDialog } from "./-components/project-create-dialog";
 import { ProjectsTable } from "./-components/projects-table";
-import {
-	getProjectsQueryOptions,
-	useProjectsQuery,
-} from "./-components/queries";
+import { getProjectsQueryOptions } from "./-components/queries";
 
 export const Route = createFileRoute("/_app/projects/")({
 	loader: async ({ context }) => {
@@ -77,7 +75,7 @@ function ProjectsRouteComponent() {
 }
 
 function ProjectsList({ organizationId }: { organizationId: string }) {
-	const { data } = useProjectsQuery(organizationId);
+	const { data } = useSuspenseQuery(getProjectsQueryOptions(organizationId));
 	return (
 		<ProjectsTable
 			projects={data.projects}

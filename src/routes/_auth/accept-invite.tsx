@@ -1,4 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+	useMutation,
+	useQueryClient,
+	useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { toast } from "sonner";
@@ -16,8 +20,8 @@ import {
 import { useAuth } from "@/integrations/better-auth/auth-provider";
 import { authClient } from "@/lib/auth-client";
 import {
+	getInvitationDetailQueryOptions,
 	invitationDetailQueryKey,
-	useInvitationDetailQuery,
 } from "./-components/queries";
 
 const searchSchema = z.object({
@@ -26,6 +30,14 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/_auth/accept-invite")({
 	validateSearch: searchSchema,
+	loader: async ({ context }) => {
+		const search = Route.useSearch();
+		if (search.invitationId) {
+			await context.queryClient.ensureQueryData(
+				getInvitationDetailQueryOptions(search.invitationId),
+			);
+		}
+	},
 	component: AcceptInviteRoute,
 });
 
@@ -37,11 +49,9 @@ function AcceptInviteRoute() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 
-	const {
-		data: invitation,
-		isLoading,
-		isFetching,
-	} = useInvitationDetailQuery(safeInvitationId);
+	const { data: invitation } = useSuspenseQuery(
+		getInvitationDetailQueryOptions(safeInvitationId),
+	);
 
 	const isPending =
 		invitation?.status === "pending" && invitation.isExpired === false;
@@ -104,10 +114,6 @@ function AcceptInviteRoute() {
 
 	if (!invitationId) {
 		return <MissingInvitationCard />;
-	}
-
-	if (isLoading || isFetching) {
-		return <LoadingCard />;
 	}
 
 	if (!invitation) {
@@ -229,26 +235,6 @@ function AcceptInviteRoute() {
 					{acceptInvitation.isPending ? "Accepting..." : "Accept invitation"}
 				</Button>
 			</CardFooter>
-		</Card>
-	);
-}
-
-function LoadingCard() {
-	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Loading invitation...</CardTitle>
-				<CardDescription>
-					Please wait while we fetch your invite.
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<div className="animate-pulse space-y-3">
-					<div className="h-4 w-2/3 rounded bg-muted" />
-					<div className="h-4 w-1/2 rounded bg-muted" />
-					<div className="h-4 w-3/4 rounded bg-muted" />
-				</div>
-			</CardContent>
 		</Card>
 	);
 }
