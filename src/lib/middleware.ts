@@ -12,7 +12,7 @@ export const sessionMiddleware = createMiddleware().server(
 
 		let sessionWithRoles = session;
 
-		if (session && session.session.activeOrganizationId && session.user?.id) {
+		if (session?.session.activeOrganizationId && session.user?.id) {
 			const membership = await getOrganizationMembership({
 				userId: session.user.id,
 				organizationId: session.session.activeOrganizationId,

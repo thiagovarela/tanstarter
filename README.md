@@ -1,15 +1,249 @@
 Welcome to Tanstarter!
 
-# Notes
+A production-ready SaaS boilerplate built with modern TypeScript patterns, focusing on simplicity and developer productivity.
 
-This is a fullstack boilerplate with a strong focus on SSR.
-~~This uses Bun all the way, including its APIs (SQL, S3, Env, Crypto, etc).~~ Keeping nodejs for now.
+UI's are not that great but a starting point ;)
 
-There are two pieces of infrastructure: Postgres 18 and Restate (RocksDB behind the scenes).
+## Architecture Overview
 
-Restate covers durable execution, scheduling, background jobs, etc. There's some integration with better-auth (like sending emails and creating a default organization and project when a user is created).
+Tanstarter focuses on **simplicity and reliability** - practical solutions that work well without unnecessary complexity. The stack is carefully chosen for productivity and scalability:
 
-I'm using drizzle because of better-auth and decided to manage schemas using it, but every other DB interaction can be just via ~~Bun SQL.~~ postgresjs
+### Core Infrastructure
+- **PostgreSQL 18** - Primary database with automatic camelCase transformation
+- **Restate** - Durable execution for background jobs, scheduling, and workflows
+- **Better-Auth** - Multi-tenant authentication with organization support
+
+### Key Architectural Decisions
+- **SSR-First** - TanStack Start with full server-side rendering
+- **Type Safety** - End-to-end TypeScript with Zod validation
+- **Multi-tenant** - Built-in organization support from day one
+- **Durable Workflows** - Reliable background processing with Restate
+
+## 🏗️ Project Structure
+
+```
+src/
+├── routes/                 # File-based routing
+│   ├── __root.tsx         # Root layout
+│   ├── _auth.tsx          # Auth layout
+│   ├── _app.tsx           # Protected app layout
+│   ├── _auth/             # Auth routes (login, register)
+│   ├── _app/              # Protected routes
+│   │   ├── projects/       # Feature routes with -components/
+│   │   └── settings/      # Settings routes
+│   └── api/               # API endpoints
+├── components/
+│   ├── ui/                # shadcn/ui primitives
+│   ├── form/              # Form components
+│   ├── shell/             # Layout components
+│   └── table/             # Table components
+├── lib/
+│   ├── workflows/         # Restate services
+│   ├── auth/              # Auth utilities
+│   └── schema/           # Database schemas
+└── hooks/                # Custom React hooks
+```
+
+## 🔐 Authentication Patterns
+
+### Multi-tenant Organization Structure
+- Every user gets a default organization created automatically via Restate workflow
+- Sessions include `activeOrganizationId` for context switching
+- Role-based permissions: `owner` > `admin` > `member`
+
+### Auth Flow Integration
+```typescript
+// User creation triggers workflow
+await restateClient.serviceClient(Accounts).afterUserCreated({
+  user,
+  organizationId,
+}, restate.rpc.opts({ idempotencyKey: user.id }));
+
+// Protected routes with middleware
+export const Route = createFileRoute("/_app/projects/")({
+  loader: async ({ context }) => {
+    const organizationId = context.session.activeOrganizationId;
+    // context includes session + organization roles
+  },
+});
+```
+
+## 🗄️ Database Patterns
+
+### Dual Approach
+- **Drizzle ORM** for schema management and better-auth integration
+- **Raw postgresjs** for queries with automatic camelCase transformation
+
+### Schema Conventions
+```typescript
+// UUID primary keys with helper
+export const organizations = pgTable("organizations", {
+  id: primaryKey("id"),
+  name: text("name").notNull(),
+  createdAt: ts("created_at").defaultNow(),
+});
+
+// Automatic snake_case → camelCase
+const data = await sql`SELECT created_at FROM organizations`;
+// Returns: { createdAt: "2025-01-01T00:00:00Z" }
+```
+
+## 🔄 Data Fetching Patterns
+
+### TanStack Query + Router Integration
+```typescript
+// Query options pattern
+export const getProjectsQueryOptions = (organizationId: string) => ({
+  queryKey: projectsQueryKey(organizationId),
+  queryFn: async (): Promise<ProjectListResponse> =>
+    listActiveOrganizationProjects(),
+});
+
+// Route loader for SSR
+export const Route = createFileRoute("/_app/projects/")({
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(
+      getProjectsQueryOptions(organizationId),
+    );
+  },
+  component: ProjectsRouteComponent,
+});
+
+// Direct usage in components (no wrapper functions)
+function ProjectsList({ organizationId }: { organizationId: string }) {
+  const { data } = useSuspenseQuery(getProjectsQueryOptions(organizationId));
+  return <ProjectsTable projects={data.projects} />;
+}
+```
+
+## 🧩 Component Patterns
+
+### shadcn/ui Integration
+- Components in `src/components/ui/` following Radix UI patterns
+- Form components using TanStack Form with Zod validation
+- Custom field components for consistent forms
+
+### Layout System
+```typescript
+// Shell with sidebar navigation
+<Shell>
+  <ShellSidebar>
+    <NavProjects />
+    <NavSecondary />
+  </ShellSidebar>
+  <ShellContent>
+    <ShellBreadcrumb />
+    <Outlet />
+  </ShellContent>
+</Shell>
+
+// Context-based breadcrumbs
+useShellBreadcrumbs([
+  { label: "Organizations", to: "/settings/organizations" },
+  { label: organization.name },
+]);
+```
+
+## ⚡ Workflow Patterns
+
+### Restate Durable Execution
+```typescript
+// Services in src/lib/workflows/
+export const accounts = restate.service({
+  name: "accounts",
+  handlers: {
+    create: async (ctx, input: CreateAccountInput) => {
+      // Idempotent user creation
+      const user = await createUser(input);
+
+      // Send welcome email
+      await ctx.invoke(workflows.email.send, {
+        to: user.email,
+        template: "welcome",
+      });
+
+      // Create default organization
+      await ctx.invoke(workflows.organizations.create, {
+        userId: user.id,
+        name: "Default Organization",
+      });
+    },
+  },
+});
+```
+
+## 🧪 Testing Patterns
+
+### Testcontainers Integration
+```typescript
+// Isolated PostgreSQL for each test run
+const testContainer = await new PostgresContainer().start();
+const testDb = postgres(testContainer.getConnectionUri());
+
+// Automatic schema migration
+await migrate(testDb, { migrationsFolder: "migrations" });
+
+// Cleanup between tests
+afterEach(async () => {
+  await testDb`TRUNCATE TABLE users, organizations CASCADE`;
+});
+```
+
+## 🛠️ Development Patterns
+
+### Environment Management
+```typescript
+// Zod-based environment validation
+const envSchema = z.object({
+  DATABASE_URL: z.string().url(),
+  RESTATE_URL: z.string().url(),
+  VITE_MEDIA_PUBLIC_BASE_URL: z.string().url(),
+});
+
+export const env = envSchema.parse(process.env);
+```
+
+### Code Quality
+- **Biome** for linting/formatting with tab indentation
+- **Husky** pre-commit hooks for code quality
+- **Strict TypeScript** with no unused locals/parameters
+- **Path aliases** with `@/` prefix
+
+## 🚀 Getting Started
+
+```bash
+# Install dependencies
+bun install
+
+# Start development (includes Postgres + Restate)
+docker-compose up -d
+bun run dev
+
+# Run tests
+bun run test
+
+# Build for production
+bun run build
+```
+
+## 📦 Key Dependencies
+
+- **TanStack** - Router, Query, Form, Start (SSR)
+- **Better-Auth** - Authentication with organization support
+- **Drizzle** - Schema management and migrations
+- **Restate** - Durable workflow execution
+- **shadcn/ui** - Component library built on Radix UI
+- **Tailwind CSS** - Utility-first styling
+- **Biome** - Linting and formatting
+- **Vitest** - Testing with Testcontainers
+
+## 🎯 Design Principles
+
+1. **Simplicity First** - Keep things simple and practical, avoid unnecessary complexity
+2. **Type Safety** - End-to-end TypeScript with Zod validation
+3. **Developer Experience** - Hot reload, auto-formatting, comprehensive tooling
+4. **Production Ready** - Durable workflows, proper error handling, monitoring
+5. **Multi-tenant** - Built-in organization support from day one
 
 
 # Getting Started
