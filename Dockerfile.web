@@ -1,0 +1,75 @@
+# Use Bun as the base image
+FROM oven/bun:1-alpine AS base
+WORKDIR /app
+
+# Install dependencies only when needed
+FROM base AS deps
+# Copy workspace root files
+COPY package.json bun.lock* ./
+# Copy packages
+COPY packages/data/package.json ./packages/data/
+COPY packages/web/package.json ./packages/web/
+RUN bun install --frozen-lockfile
+
+# Build the application
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Copy environment file for build
+COPY packages/web/.env.sample packages/web/.env
+WORKDIR /app/packages/web
+RUN bun run build
+
+# Production image
+FROM oven/bun:1-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Install curl for health check and create non-root user
+RUN apk add --no-cache curl && \
+    addgroup --system --gid 1001 appuser && \
+    adduser --system --uid 1001 appuser
+
+# Copy built application
+COPY --from=builder --chown=appuser:appuser /app/packages/web/dist ./dist
+COPY --from=builder --chown=appuser:appuser /app/packages/web/package.json ./package.json
+COPY --from=builder --chown=appuser:appuser /app/packages/web/server.ts ./server.ts
+
+# Copy workspace files for production install
+COPY package.json bun.lock* ./
+COPY packages/data/package.json ./packages/data/
+COPY packages/web/package.json ./packages/web/
+
+# Install only production dependencies with aggressive cleanup
+RUN bun install --frozen-lockfile --production --ignore-scripts && \
+    bun pm cache rm && \
+    find node_modules -name "*.md" -delete && \
+    find node_modules -name "*.txt" -delete && \
+    find node_modules -name "LICENSE*" -delete && \
+    find node_modules -name "CHANGELOG*" -delete && \
+    find node_modules -name "README*" -delete && \
+    find node_modules -name "*.test.*" -delete && \
+    find node_modules -name "*.spec.*" -delete && \
+    find node_modules -type d -name "__tests__" -exec rm -rf {} + 2>/dev/null || true && \
+    find node_modules -type d -name "test" -exec rm -rf {} + 2>/dev/null || true && \
+    find node_modules -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true && \
+    find node_modules -type d -name "coverage" -exec rm -rf {} + 2>/dev/null || true && \
+    find node_modules -type d -name "docs" -exec rm -rf {} + 2>/dev/null || true && \
+    find node_modules -type d -name "examples" -exec rm -rf {} + 2>/dev/null || true && \
+    find node_modules -name "*.map" -delete && \
+    rm -rf node_modules/.bin
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Start application
+CMD ["bun", "run", "server.ts"]

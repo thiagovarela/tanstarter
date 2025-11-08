@@ -11,6 +11,7 @@
 			"**/src/**/*",
 			"!**/src/components/ui",
 			"!**/src/components/ai-elements",
+			"!**/src/server.ts",
 			"!**/src/components/motion",
 			"**/.vscode/**/*",
 			"**/index.html",
