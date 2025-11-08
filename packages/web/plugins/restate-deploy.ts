@@ -1,6 +1,6 @@
 import type { Plugin } from "vite";
 
-import { registerRestateDeployment } from "../packages/web/scripts/register-restate";
+import { registerRestateDeployment } from "../scripts/register-restate";
 
 const WATCHED_GLOBS = ["src/lib/workflows", "src/routes/api/restate"];
 
