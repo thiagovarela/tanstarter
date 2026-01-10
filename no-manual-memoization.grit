@@ -1,0 +1,8 @@
+`$fn($args)` where {
+    $fn <: or { `useCallback`, `useMemo`, `memo` },
+    register_diagnostic(
+        span = $fn,
+        message = "React Compiler handles memoization automatically. Remove manual useCallback/useMemo/memo.",
+        severity = "error"
+    )
+}

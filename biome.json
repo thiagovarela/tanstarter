@@ -1,5 +1,10 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.3.10/schema.json",
+	"plugins": [
+		"./no-manual-memoization.grit",
+		"./no-dynamic-imports.grit",
+		"./zod4-patterns.grit"
+	],
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -28,12 +33,62 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": true,
+			"complexity": {
+				"noStaticOnlyClass": "off"
+			},
+			"style": {
+				"noRestrictedImports": {
+					"level": "error",
+					"options": {
+						"patterns": [
+							{
+								"group": [
+									"@/lib/modules/*/managers",
+									"@/lib/modules/*/managers.ts",
+									"@/lib/modules/*/functions",
+									"@/lib/modules/*/functions.ts",
+									"@/lib/modules/*/durable",
+									"@/lib/modules/*/durable.ts"
+								],
+								"message": "Import from module index.ts (client-safe), server.ts (server-only), or types.ts. Internal module files are private."
+							}
+						]
+					}
+				}
+			}
 		}
 	},
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double"
 		}
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["**/src/lib/modules/**/*"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": [
+				"**/src/lib/auth.ts",
+				"**/src/lib/middleware.ts",
+				"**/src/lib/restate-endpoints.ts",
+				"**/src/routes/api/**/*.ts"
+			],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": "off"
+					}
+				}
+			}
+		}
+	]
 }

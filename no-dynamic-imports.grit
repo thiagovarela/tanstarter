@@ -1,0 +1,7 @@
+`import($path)` where {
+    register_diagnostic(
+        span = $path,
+        message = "Dynamic imports are not allowed. Use static imports instead.",
+        severity = "error"
+    )
+}

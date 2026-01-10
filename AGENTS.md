@@ -59,9 +59,61 @@ When coding, always explain what you are doing and why your job is to help the u
 - **Components**: shadcn/ui patterns with cva variants, PascalCase naming
 - **Forms**: TanStack Form with Zod validation, proper error handling
 - **Async**: TanStack Query for data fetching, toast notifications for feedback
-- **File structure**: `src/routes/` (feature-based) with a sub folder "-components", `src/components/ui/` (core), `src/lib/workflows/` (workflows)
+- **File structure**:
+  - `src/routes/` (feature-based) with `-components/` for UI only
+  - `src/lib/modules/` (business logic modules)
+  - `src/components/ui/` (core UI components)
+  - `src/data/` (database schemas)
 - **Styling**: Tailwind CSS with class-variance-authority, cn() utility for classes
-- **Workflows**: Restate services in `src/lib/workflows/` with durable execution, Zod validation, and endpoint handlers in routes
+- **Workflows**: Restate services in module `durable.ts` files with durable execution, Zod validation
+
+## Modules Pattern
+
+Business logic lives in `src/lib/modules/{feature}/` with standardized files:
+
+```
+src/lib/modules/{feature}/
+├── types.ts        # Zod schemas & TypeScript types
+├── functions.ts    # TanStack Server functions (API layer)
+├── managers.ts     # Static class for database operations
+├── queries.ts      # TanStack Query options & mutations
+└── durable.ts      # Restate services (optional, for workflows)
+```
+
+**Example - Projects module:**
+
+```typescript
+// types.ts - Input/output contracts
+export const createProjectInput = z.object({
+  name: z.string().min(1).max(100),
+});
+export type CreateProjectInput = z.infer<typeof createProjectInput>;
+
+// managers.ts - SQL queries
+export class ProjectManager {
+  static async list(userId: string, orgId: string) {
+    return sql`SELECT * FROM projects WHERE organization_id = ${orgId}`;
+  }
+}
+
+// functions.ts - Server functions
+export const listProjects = createAuthServerFn()
+  .middleware([requireOrgUserMiddleware])
+  .handler(async ({ context }) => {
+    return ProjectManager.list(context.user.id, context.activeOrganizationId);
+  });
+
+// queries.ts - TanStack Query
+export const getProjectsQueryOptions = (orgId: string) => ({
+  queryKey: ["projects", "list", orgId],
+  queryFn: () => listProjects(),
+});
+```
+
+Routes import from modules, keeping UI thin:
+```typescript
+import { getProjectsQueryOptions } from "@/lib/modules/projects/queries";
+```
 - **DB Tips**: The configured Postgres client already applies `toCamel` transforms, so avoid hand-written snake_case row types—select columns with `as` aliases instead.
 - **Zod 4**: Use the new helpers like `z.uuid()` and `z.email()` instead of chaining off `z.string()`.
 

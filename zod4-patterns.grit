@@ -1,0 +1,258 @@
+// Enforce Zod 4 string format helpers instead of chaining off z.string()
+or {
+    // z.string().email() → z.email()
+    `z.string().email($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.email() instead of z.string().email() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().email()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.email() instead of z.string().email() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().uuid() → z.uuid()
+    `z.string().uuid($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.uuid() instead of z.string().uuid() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().uuid()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.uuid() instead of z.string().uuid() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().url() → z.url()
+    `z.string().url($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.url() instead of z.string().url() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().url()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.url() instead of z.string().url() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().emoji() → z.emoji()
+    `z.string().emoji($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.emoji() instead of z.string().emoji() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().emoji()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.emoji() instead of z.string().emoji() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().datetime() → z.iso.datetime()
+    `z.string().datetime($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.iso.datetime() instead of z.string().datetime() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().datetime()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.iso.datetime() instead of z.string().datetime() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().date() → z.iso.date()
+    `z.string().date($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.iso.date() instead of z.string().date() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().date()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.iso.date() instead of z.string().date() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().time() → z.iso.time()
+    `z.string().time($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.iso.time() instead of z.string().time() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().time()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.iso.time() instead of z.string().time() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().duration() → z.iso.duration()
+    `z.string().duration($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.iso.duration() instead of z.string().duration() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().duration()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.iso.duration() instead of z.string().duration() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().base64() → z.base64()
+    `z.string().base64($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.base64() instead of z.string().base64() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().base64()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.base64() instead of z.string().base64() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().ip() → z.ipv4() or z.ipv6()
+    `z.string().ip($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.ipv4() or z.ipv6() instead of z.string().ip() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().ip()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.ipv4() or z.ipv6() instead of z.string().ip() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().cuid() → z.cuid()
+    `z.string().cuid($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.cuid() instead of z.string().cuid() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().cuid()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.cuid() instead of z.string().cuid() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().cuid2() → z.cuid2()
+    `z.string().cuid2($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.cuid2() instead of z.string().cuid2() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().cuid2()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.cuid2() instead of z.string().cuid2() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().ulid() → z.ulid()
+    `z.string().ulid($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.ulid() instead of z.string().ulid() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().ulid()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.ulid() instead of z.string().ulid() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().nanoid() → z.nanoid()
+    `z.string().nanoid($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.nanoid() instead of z.string().nanoid() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().nanoid()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.nanoid() instead of z.string().nanoid() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().jwt() → z.jwt()
+    `z.string().jwt($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.jwt() instead of z.string().jwt() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().jwt()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.jwt() instead of z.string().jwt() (Zod 4)",
+            severity = "warn"
+        )
+    },
+
+    // z.string().cidr() → z.cidrv4() or z.cidrv6()
+    `z.string().cidr($args)` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.cidrv4() or z.cidrv6() instead of z.string().cidr() (Zod 4)",
+            severity = "warn"
+        )
+    },
+    `z.string().cidr()` where {
+        register_diagnostic(
+            span = $match,
+            message = "Use z.cidrv4() or z.cidrv6() instead of z.string().cidr() (Zod 4)",
+            severity = "warn"
+        )
+    }
+}
